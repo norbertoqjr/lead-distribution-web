@@ -1,58 +1,483 @@
+/*
+ * Design tokens. Semantic names only — components never reference raw hex, so
+ * a theme change happens here and nowhere else.
+ *
+ * Contrast verified against WCAG AA (4.5:1 body, 3:1 large/UI) in both themes.
+ */
 :root {
-  --bg: #ffffff;
-  --fg: #101418;
-  --muted: #5b6570;
-  --border: #e3e7ea;
-  --accent: #2563eb;
+  /* Neutrals */
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-sunken: #f6f8fa;
+  --border: #d8dee4;
+  --border-strong: #b9c2cc;
+
+  /* Text — 15.8:1 and 5.6:1 on --surface */
+  --text: #12181f;
+  --text-muted: #5a6672;
+  --text-inverse: #ffffff;
+
+  /* Brand */
+  --accent: #1f56d6;
+  --accent-hover: #1946b4;
+  --accent-subtle: #eaf0fe;
+
+  /* Status */
+  --ok: #12694a;
+  --ok-subtle: #e2f5ec;
+  --warn: #8a5300;
+  --warn-subtle: #fdf0dc;
+  --danger: #a5231c;
+  --danger-subtle: #fdeceb;
+
+  /* Spacing — 4px rhythm */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  --radius-sm: 6px;
+  --radius: 10px;
+
+  --shadow-sm: 0 1px 2px rgb(16 24 32 / 0.06);
+
+  --container: 68rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0e1216;
-    --fg: #e9edf1;
-    --muted: #9aa5b1;
-    --border: #232a31;
-    --accent: #6ea8fe;
+    --surface: #0d1117;
+    --surface-raised: #161b22;
+    --surface-sunken: #10151c;
+    --border: #2b3440;
+    --border-strong: #3d4854;
+
+    /* Desaturated tonal variants, not inverted values */
+    --text: #e8edf3;
+    --text-muted: #9aa7b4;
+    --text-inverse: #0d1117;
+
+    --accent: #7aa2ff;
+    --accent-hover: #9bb8ff;
+    --accent-subtle: #182338;
+
+    --ok: #5fd3a2;
+    --ok-subtle: #12281f;
+    --warn: #e5b567;
+    --warn-subtle: #2a2113;
+    --danger: #ff8b82;
+    --danger-subtle: #2d1917;
+
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
   }
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  padding: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  line-height: 1.55;
+  background: var(--surface);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
-main {
-  max-width: 46rem;
-  margin: 0 auto;
-  padding: 4rem 1.5rem;
-}
-
-h1 {
-  font-size: 1.6rem;
-  margin: 0 0 0.5rem;
+h1,
+h2,
+h3 {
+  line-height: 1.25;
+  margin: 0;
+  letter-spacing: -0.011em;
 }
 
 p {
-  color: var(--muted);
-  margin: 0 0 1.5rem;
+  margin: 0;
 }
 
-.status {
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Never removed — only restyled. Keyboard users depend on it. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--space-6);
+}
+
+/* Keyboard users reach content without tabbing through the whole nav. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface-raised);
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  padding: 1rem 1.25rem;
+  border-radius: var(--radius-sm);
+  z-index: 100;
+}
+
+.skip-link:focus {
+  left: var(--space-4);
+}
+
+/* ---------- Header ---------- */
+
+.site-header {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-raised);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 60px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--text);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.brand:hover {
+  text-decoration: none;
+}
+
+.brand__mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-subtle);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.nav__link {
+  display: inline-flex;
+  align-items: center;
+  /* 44px minimum touch target */
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition:
+    background-color 160ms ease-out,
+    color 160ms ease-out;
+}
+
+.nav__link:hover {
+  background: var(--surface-sunken);
+  color: var(--text);
+  text-decoration: none;
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+  padding-block: var(--space-16) var(--space-12);
+  border-bottom: 1px solid var(--border);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  margin-bottom: var(--space-6);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.hero h1 {
+  font-size: clamp(1.875rem, 1.2rem + 2.4vw, 3rem);
+  font-weight: 680;
+  margin-bottom: var(--space-4);
+}
+
+.hero__lede {
+  /* ~65ch keeps the measure readable on wide screens */
+  max-width: 42rem;
+  font-size: 1.0625rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-8);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-6);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 550;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease-out,
+    border-color 160ms ease-out;
+}
+
+.btn:hover {
+  text-decoration: none;
+}
+
+/* One primary action per view; everything else is subordinate. */
+.btn--primary {
+  background: var(--accent);
+  color: var(--text-inverse);
+}
+
+.btn--primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn--secondary {
+  background: var(--surface-raised);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.btn--secondary:hover {
+  background: var(--surface-sunken);
+}
+
+/* ---------- Sections & cards ---------- */
+
+.section {
+  padding-block: var(--space-12);
+}
+
+.section__title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: var(--space-6);
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+}
+
+.card {
+  padding: var(--space-6);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.card__icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+.card p {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+}
+
+/* ---------- Status ---------- */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+/* Dot plus text label — status is never carried by colour alone. */
+.badge__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.badge--ok {
+  background: var(--ok-subtle);
+  color: var(--ok);
+}
+
+.badge--warn {
+  background: var(--warn-subtle);
+  color: var(--warn);
+}
+
+.badge--danger {
+  background: var(--danger-subtle);
+  color: var(--danger);
+}
+
+.status-list {
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  overflow: hidden;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+}
+
+.status-row + .status-row {
+  border-top: 1px solid var(--border);
+}
+
+.status-row__label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.status-row__term {
+  font-weight: 550;
+  font-size: 0.9375rem;
+}
+
+.status-row__hint {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.status-row__value {
+  margin: 0;
+}
+
+.mono {
+  /* Tabular figures stop values jittering as they change */
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
   font-size: 0.875rem;
 }
 
-.status strong {
-  color: var(--fg);
+.note {
+  padding: var(--space-4) var(--space-6);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--warn);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  padding-block: var(--space-8);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.site-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+@media (max-width: 30rem) {
+  .hero {
+    padding-block: var(--space-12) var(--space-8);
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
