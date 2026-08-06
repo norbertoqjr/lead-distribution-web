@@ -1,5 +1,6 @@
 import axios from "axios";
-import { getApiHealth } from "./api";
+import { apiFetch, getApiHealth } from "./api";
+import { z } from "zod";
 
 jest.mock("axios");
 
@@ -53,5 +54,41 @@ describe("getApiHealth", () => {
 
     await expect(getApiHealth()).resolves.toBeNull();
     expect(mockedAxios.get).not.toHaveBeenCalled();
+  });
+});
+
+jest.mock("next/headers", () => ({
+  cookies: async () => ({ get: () => undefined }),
+}));
+
+describe("apiFetch", () => {
+  const originalBackendUrl = process.env.BACKEND_URL;
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    process.env.BACKEND_URL = "http://127.0.0.1:8193";
+  });
+
+  afterAll(() => {
+    process.env.BACKEND_URL = originalBackendUrl;
+  });
+
+  it("reads an empty body as null", async () => {
+    // Nest sends a null return as zero bytes, which axios reports as "". The
+    // dashboard asks /forms and /distributions for records that need not exist
+    // yet, so on a fresh database this is the ordinary answer, not a fault.
+    mockedAxios.request.mockResolvedValue({ data: "" });
+
+    await expect(
+      apiFetch("/forms", z.object({ id: z.number() }).nullable()),
+    ).resolves.toBeNull();
+  });
+
+  it("still rejects a body of the wrong shape", async () => {
+    mockedAxios.request.mockResolvedValue({ data: { unexpected: true } });
+
+    await expect(
+      apiFetch("/forms", z.object({ id: z.number() }).nullable()),
+    ).rejects.toThrow("The API returned an unexpected response");
   });
 });
