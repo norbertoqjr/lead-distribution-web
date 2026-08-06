@@ -1,82 +1,99 @@
-import Link from 'next/link';
-import {
-  ActivityIcon,
-  ArrowRightIcon,
-  ClockIcon,
-  ShieldIcon,
-  UsersIcon,
-} from '@/components/icons';
+import { Activity, Clock, ShieldCheck, Users } from "lucide-react";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
+import { Card, CardContent } from "@/components/ui/card";
+
+/** The lead one gets the wide cell; the rest sit beneath it. */
+const lead = {
+  icon: Users,
+  title: "Fair broker share",
+  body: "Each broker gets a target percentage. The next lead goes to whoever is furthest behind their share, so the split holds over time rather than only on average.",
+};
 
 const capabilities = [
   {
-    icon: <UsersIcon />,
-    title: 'Fair broker share',
-    body: 'Each broker gets a target percentage. The next lead goes to whoever is furthest behind their share.',
+    icon: Clock,
+    title: "Timezone aware",
+    body: "Opening hours, working days, and daily caps are evaluated in the broker’s own timezone, not the server’s.",
   },
   {
-    icon: <ClockIcon />,
-    title: 'Timezone aware',
-    body: 'Opening hours, working days, and daily caps are evaluated in the broker’s own timezone, not the server’s.',
+    icon: ShieldCheck,
+    title: "No duplicate leads",
+    body: "Emails are normalized on submission. An address already sent to a broker is never routed to a second one.",
   },
   {
-    icon: <ShieldIcon />,
-    title: 'No duplicate leads',
-    body: 'Emails are normalized on submission. An address already sent to a broker is never routed to a second one.',
-  },
-  {
-    icon: <ActivityIcon />,
-    title: 'Full audit trail',
-    body: 'Every lead is recorded with its captured IP address and status: sent, unsent, duplicate, or failed.',
+    icon: Activity,
+    title: "Full audit trail",
+    body: "Every lead is recorded with its captured IP address and status.",
   },
 ];
 
 export default function HomePage() {
   return (
     <>
-      <section className="hero">
-        <div className="container">
-          <p className="eyebrow">Admin platform</p>
+      <SiteHeader />
 
-          <h1>Route every lead to the right broker.</h1>
+      <main id="main">
+        <section className="border-b">
+          <div className="mx-auto max-w-5xl px-6 py-16 sm:py-24">
+            <p className="text-muted-foreground bg-muted mb-6 inline-flex rounded-full border px-3 py-1 text-xs font-medium">
+              Admin platform
+            </p>
 
-          <p className="hero__lede">
-            One public form, one distribution, many brokers. Leads are captured
-            with their IP address, checked for duplicates, and assigned by
-            percentage share within each broker’s working hours and daily cap.
-          </p>
+            <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-5xl">
+              Route every lead to the right broker.
+            </h1>
 
-          <div className="actions">
-            <Link className="btn btn--primary" href="/health">
-              View system health
-              <ArrowRightIcon />
-            </Link>
-            <a
-              className="btn btn--secondary"
-              href="https://github.com/norbertoqjr/lead-distribution-platform"
-              target="_blank"
-              rel="noreferrer noopener"
-            >
-              Documentation
-            </a>
+            {/* max-w keeps the measure near 65 characters on wide screens */}
+            <p className="text-muted-foreground mt-4 max-w-2xl text-lg text-pretty">
+              One public form, one distribution, many brokers. Leads are
+              captured with their IP address, checked for duplicates, and
+              assigned by percentage share within each broker’s working hours
+              and daily cap.
+            </p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="section">
-        <div className="container">
-          <h2 className="section__title">How distribution works</h2>
+        <section className="mx-auto max-w-5xl px-6 py-12">
+          <h2 className="text-muted-foreground mb-6 text-xs font-semibold tracking-wider uppercase">
+            How distribution works
+          </h2>
 
-          <div className="grid">
+          {/* Asymmetric on purpose: a row of identical cards flattens the
+              hierarchy and tells the reader nothing about what matters. */}
+          <div className="grid gap-4 lg:grid-cols-3">
+            <Card className="lg:col-span-3">
+              <CardContent className="flex flex-col gap-4 pt-6 sm:flex-row sm:items-start sm:gap-6">
+                <span className="bg-accent text-accent-foreground grid size-10 shrink-0 place-items-center rounded-md">
+                  <lead.icon className="size-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <h3 className="text-lg font-medium">{lead.title}</h3>
+                  <p className="text-muted-foreground mt-1 max-w-2xl text-sm">
+                    {lead.body}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
             {capabilities.map((item) => (
-              <article className="card" key={item.title}>
-                <span className="card__icon">{item.icon}</span>
-                <h3>{item.title}</h3>
-                <p>{item.body}</p>
-              </article>
+              <Card key={item.title}>
+                <CardContent className="pt-6">
+                  <span className="bg-accent text-accent-foreground mb-4 grid size-9 place-items-center rounded-md">
+                    <item.icon className="size-5" aria-hidden="true" />
+                  </span>
+                  <h3 className="font-medium">{item.title}</h3>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    {item.body}
+                  </p>
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
+
+      <SiteFooter />
     </>
   );
 }

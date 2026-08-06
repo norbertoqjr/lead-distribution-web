@@ -1,0 +1,109 @@
+name: Deploy Web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Never let two deploys write .next at once. Queue rather than cancel: a
+# half-applied deploy is worse than a slow one.
+concurrency:
+  group: deploy-web
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Lint, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run build
+
+  deploy:
+    name: Deploy to VPS
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      # Configuration is NOT written from here. The .env file lives on the VPS,
+      # created once by hand, so BACKEND_URL and the session cookie name never
+      # leave the server. GitHub holds SSH access and nothing else.
+      #
+      # This is safe across redeploys because .env is gitignored and the script
+      # uses `git reset --hard`, which leaves untracked files alone. There is
+      # deliberately no `git clean` anywhere below.
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          # Key, not the account password: CI access can then be revoked by
+          # removing a line from authorized_keys.
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            # Actions opens a non-interactive shell, which skips .bashrc, so
+            # nvm has to be sourced explicitly or node is not on PATH.
+            export NVM_DIR="$HOME/.nvm"
+            . "$NVM_DIR/nvm.sh"
+
+            APP=~/apps/lds-web
+
+            if [ ! -d "$APP/.git" ]; then
+              echo "ERROR: $APP is not a git checkout." >&2
+              echo "Run the one-time bootstrap first — see docs/DEPLOYMENT.md" >&2
+              exit 1
+            fi
+
+            cd "$APP"
+            git fetch --all --prune
+            git reset --hard origin/main
+
+            if [ ! -f .env ]; then
+              echo "ERROR: .env missing at $APP" >&2
+              echo "Create it once from .env.example — see docs/DEPLOYMENT.md" >&2
+              exit 1
+            fi
+
+            for key in PORT BACKEND_URL SESSION_COOKIE_NAME NEXT_PUBLIC_SITE_URL; do
+              grep -q "^${key}=" .env || {
+                echo "ERROR: $key missing from $APP/.env" >&2
+                exit 1
+              }
+            done
+
+            # PORT must be in the process environment before pm2 starts the
+            # process. package.json runs `next start -p ${PORT:-8192}`, and the
+            # shell expands that before Next loads any env file — leaving it to
+            # .env alone would silently serve on 8192 whatever is configured.
+            set -a
+            . ./.env
+            set +a
+
+            npm ci
+            npm run build
+
+            pm2 restart lds-web --update-env \
+              || pm2 start npm --name lds-web -- start
+            pm2 save
+
+            # Give Next a moment to bind before probing.
+            sleep 4
+            curl -fsS -o /dev/null -w 'homepage %{http_code}\n' \
+              "http://127.0.0.1:${PORT}/"
+
+            if command -v ss >/dev/null 2>&1; then
+              echo "--- listeners ---"
+              ss -tln | grep -E ":${PORT}" || true
+            fi
