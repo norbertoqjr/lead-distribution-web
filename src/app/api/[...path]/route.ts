@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { readSessionCookie } from "@/lib/session-cookie";
+import { isSecureOrigin, readSessionCookie } from "@/lib/session-cookie";
 
 /**
  * Same-origin proxy to the backend.
@@ -92,7 +92,7 @@ async function forward(
     proxied.cookies.set(SESSION_COOKIE, action.value, {
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      secure: isSecureOrigin(),
       maxAge: 7 * 24 * 60 * 60,
       path: "/",
     });
@@ -100,7 +100,7 @@ async function forward(
     proxied.cookies.set(SESSION_COOKIE, "", {
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      secure: isSecureOrigin(),
       maxAge: 0,
       path: "/",
     });

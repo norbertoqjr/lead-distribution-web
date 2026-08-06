@@ -1,4 +1,4 @@
-import { readSessionCookie } from "./session-cookie";
+import { isSecureOrigin, readSessionCookie } from "./session-cookie";
 
 const NAME = "lds_session";
 
@@ -41,5 +41,33 @@ describe("readSessionCookie", () => {
     expect(readSessionCookie("other=value; Path=/", NAME)).toEqual({
       type: "none",
     });
+  });
+});
+
+describe("isSecureOrigin", () => {
+  const original = process.env.NEXT_PUBLIC_SITE_URL;
+
+  afterEach(() => {
+    process.env.NEXT_PUBLIC_SITE_URL = original;
+  });
+
+  it("marks the cookie Secure when the site is served over https", () => {
+    process.env.NEXT_PUBLIC_SITE_URL = "https://leads.example.com";
+
+    expect(isSecureOrigin()).toBe(true);
+  });
+
+  it("does not, over plain http", () => {
+    // The browser drops a Secure cookie on an http origin, so a production
+    // deployment without TLS would sign the user in and lose the session.
+    process.env.NEXT_PUBLIC_SITE_URL = "http://203.0.113.5:8192";
+
+    expect(isSecureOrigin()).toBe(false);
+  });
+
+  it("does not, when the site URL is unset", () => {
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+
+    expect(isSecureOrigin()).toBe(false);
   });
 });
