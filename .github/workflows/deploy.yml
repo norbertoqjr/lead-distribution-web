@@ -1,0 +1,104 @@
+name: Deploy Web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Never let two deploys write .next at once. Queue rather than cancel: a
+# half-applied deploy is worse than a slow one.
+concurrency:
+  group: deploy-web
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Lint, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run build
+
+  deploy:
+    name: Deploy to VPS
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          # Key, not VPS_PASSWORD: CI access can then be revoked by removing a
+          # line from authorized_keys, without changing the account password.
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script_stop: true
+          envs: WEB_PORT,API_PORT,VPS_HOST
+          script: |
+            set -euo pipefail
+
+            # Actions runs a non-interactive shell, which skips .bashrc, so nvm
+            # has to be sourced explicitly or node is not on PATH.
+            export NVM_DIR="$HOME/.nvm"
+            . "$NVM_DIR/nvm.sh"
+
+            APP=~/apps/lds-web
+
+            if [ ! -d "$APP/.git" ]; then
+              mkdir -p ~/apps
+              git clone https://github.com/norbertoqjr/lead-distribution-web.git "$APP"
+            fi
+
+            cd "$APP"
+            git fetch --all --prune
+            git reset --hard origin/main
+
+            # BACKEND_URL stays on loopback and carries no NEXT_PUBLIC_ prefix,
+            # so the private port is never inlined into the browser bundle.
+            cat > .env <<ENV
+            NODE_ENV=production
+            PORT=${WEB_PORT}
+            BACKEND_URL=http://127.0.0.1:${API_PORT}
+            SESSION_COOKIE_NAME=lds_session
+            NEXT_PUBLIC_SITE_URL=http://${VPS_HOST}:${WEB_PORT}
+            ENV
+            chmod 600 .env
+
+            npm ci
+            npm run build
+
+            # PORT must be in the process environment before pm2 starts the
+            # process. package.json runs `next start -p ${PORT:-8192}`, and the
+            # shell expands that before Next loads any env file — leaving it to
+            # .env alone would silently serve on 8192 whatever is configured.
+            set -a
+            . ./.env
+            set +a
+
+            pm2 restart lds-web --update-env \
+              || pm2 start npm --name lds-web -- start
+            pm2 save
+
+            # Give Next a moment to bind before probing.
+            sleep 4
+            curl -fsS -o /dev/null -w 'homepage %{http_code}\n' \
+              "http://127.0.0.1:${WEB_PORT}/"
+
+            if command -v ss >/dev/null 2>&1; then
+              echo "--- listeners ---"
+              ss -tln | grep -E ":${WEB_PORT}|:${API_PORT}" || true
+            fi
+        env:
+          WEB_PORT: ${{ secrets.WEB_PORT }}
+          API_PORT: ${{ secrets.API_PORT }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
