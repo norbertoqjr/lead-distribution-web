@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { Activity, ArrowRight, Clock, ShieldCheck, Users } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -112,14 +113,7 @@ export default async function HomePage() {
         </section>
       </main>
 
-      <footer className="text-muted-foreground border-t">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-6 text-sm">
-          <span>Lead Distribution Platform</span>
-          <Link href="/health" className="hover:underline">
-            System health
-          </Link>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   );
 }

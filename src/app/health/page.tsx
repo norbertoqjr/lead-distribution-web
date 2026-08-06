@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getApiHealth } from "@/lib/api";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -138,6 +139,8 @@ export default async function HealthPage() {
           </Card>
         )}
       </main>
+
+      <SiteFooter />
     </>
   );
 }

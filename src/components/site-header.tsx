@@ -1,9 +1,9 @@
-import Link from 'next/link';
-import { cookies } from 'next/headers';
-import { Route } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { Route } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? 'lds_session';
+const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? "lds_session";
 
 /**
  * Public header. Swaps the sign-in call to action for a link into the admin
@@ -30,11 +30,9 @@ export async function SiteHeader() {
           Lead Distribution
         </Link>
 
+        {/* Health moved to the footer: it is a diagnostic, not a
+            destination. The header carries the one action that matters. */}
         <nav aria-label="Main" className="flex items-center gap-1">
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/health">Health</Link>
-          </Button>
-
           {signedIn ? (
             <Button asChild size="sm">
               <Link href="/dashboard">Dashboard</Link>
