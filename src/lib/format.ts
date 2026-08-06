@@ -20,7 +20,73 @@ export function formatWorkingDays(value: string): string {
   return days.map((day) => DAY_LABELS[day - 1]).join(", ");
 }
 
-export function formatDateTime(value: string | null): string {
+/**
+ * Absolute timestamp, e.g. "6 Aug 2026, 09:14".
+ *
+ * The locale is pinned rather than left to the runtime: Node and the browser
+ * resolve the default differently, so an unpinned toLocaleString renders one
+ * string on the server and another on the client, which React reports as a
+ * hydration mismatch.
+ */
+export function formatDateTime(
+  value: string | Date | null,
+  timeZone?: string,
+): string {
   if (!value) return "—";
-  return new Date(value).toLocaleString();
+
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone,
+  }).format(date);
+}
+
+const MINUTE = 60;
+const HOUR = MINUTE * 60;
+const DAY = HOUR * 24;
+const WEEK = DAY * 7;
+const MONTH = DAY * 30;
+const YEAR = DAY * 365;
+
+/**
+ * Human-readable elapsed time: "just now", "5 minutes ago", "3 days ago".
+ *
+ * Falls back to an absolute date beyond a year, where "2 years ago" stops
+ * being useful and the reader wants the actual date.
+ */
+export function formatRelative(
+  value: string | Date | null,
+  now: Date = new Date(),
+): string {
+  if (!value) return "—";
+
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+
+  const seconds = Math.round((date.getTime() - now.getTime()) / 1000);
+  const absolute = Math.abs(seconds);
+
+  if (absolute < 45) return "just now";
+  if (absolute >= YEAR) return formatDateTime(date);
+
+  const format = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+
+  const [amount, unit]: [number, Intl.RelativeTimeFormatUnit] =
+    absolute < HOUR
+      ? [Math.round(seconds / MINUTE), "minute"]
+      : absolute < DAY
+        ? [Math.round(seconds / HOUR), "hour"]
+        : absolute < WEEK
+          ? [Math.round(seconds / DAY), "day"]
+          : absolute < MONTH
+            ? [Math.round(seconds / WEEK), "week"]
+            : [Math.round(seconds / MONTH), "month"];
+
+  return format.format(amount, unit);
 }

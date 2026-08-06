@@ -17,6 +17,7 @@ import {
   DistributionBrokers,
 } from "@/components/admin/distribution-setup";
 import { StatusBadge } from "@/components/admin/status-badge";
+import { TimeAgo } from "@/components/admin/time-ago";
 import { TablePagination } from "@/components/admin/table-pagination";
 import { TabLinks } from "@/components/admin/tab-links";
 import {
@@ -27,7 +28,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatDateTime } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Distribution", robots: noIndex };
 export const dynamic = "force-dynamic";
@@ -191,7 +191,7 @@ export default async function DistributionPage({
                           <StatusBadge status={lead.status} />
                         </TableCell>
                         <TableCell className="text-muted-foreground text-sm">
-                          {formatDateTime(lead.createdAt)}
+                          <TimeAgo value={lead.createdAt} />
                         </TableCell>
                         <TableCell className="text-muted-foreground pr-5 text-sm">
                           {lead.note ?? "—"}

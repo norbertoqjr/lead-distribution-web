@@ -5,7 +5,7 @@ import { formResponseSchema } from "@/lib/schemas";
 import { AdminShell, PageHeader } from "@/components/admin/shell";
 import { CreateFormCard } from "@/components/admin/create-form-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatDateTime } from "@/lib/format";
+import { TimeAgo } from "@/components/admin/time-ago";
 
 export const metadata: Metadata = { title: "Lead form", robots: noIndex };
 export const dynamic = "force-dynamic";
@@ -36,7 +36,7 @@ export default async function FormPage() {
             </div>
             <div className="flex justify-between gap-4">
               <span className="text-muted-foreground">Created</span>
-              <span>{formatDateTime(form.createdAt)}</span>
+              <TimeAgo value={form.createdAt} />
             </div>
           </CardContent>
         </Card>

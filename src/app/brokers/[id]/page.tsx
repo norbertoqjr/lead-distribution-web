@@ -14,6 +14,7 @@ import {
 import { DashboardCard } from "@/components/admin/dashboard-card";
 import { AdminShell, EmptyState, PageHeader } from "@/components/admin/shell";
 import { StatusBadge } from "@/components/admin/status-badge";
+import { TimeAgo } from "@/components/admin/time-ago";
 import { TablePagination } from "@/components/admin/table-pagination";
 import {
   Table,
@@ -23,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatDateTime, formatWorkingDays, minutesToTime } from "@/lib/format";
+import { formatWorkingDays, minutesToTime } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Broker", robots: noIndex };
 export const dynamic = "force-dynamic";
@@ -59,6 +60,7 @@ export default async function BrokerDetailPage({
   return (
     <AdminShell>
       <PageHeader
+        back={{ href: "/brokers", label: "All brokers" }}
         title={broker.name}
         description={`${broker.timezone} · ${minutesToTime(broker.openMinute)}–${minutesToTime(
           broker.closeMinute,
@@ -104,7 +106,7 @@ export default async function BrokerDetailPage({
                       {lead.formName}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
-                      {formatDateTime(lead.assignedAt)}
+                      <TimeAgo value={lead.assignedAt} />
                     </TableCell>
                     <TableCell>
                       <StatusBadge status={lead.status} />

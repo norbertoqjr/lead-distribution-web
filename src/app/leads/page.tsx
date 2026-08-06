@@ -12,6 +12,7 @@ import {
 import { DashboardCard } from "@/components/admin/dashboard-card";
 import { AdminShell, EmptyState, PageHeader } from "@/components/admin/shell";
 import { StatusBadge } from "@/components/admin/status-badge";
+import { TimeAgo } from "@/components/admin/time-ago";
 import { AssignLeadForm } from "@/components/admin/assign-lead-form";
 import { TablePagination } from "@/components/admin/table-pagination";
 import {
@@ -23,7 +24,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { formatDateTime } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Leads", robots: noIndex };
 export const dynamic = "force-dynamic";
@@ -101,7 +101,7 @@ export default async function LeadsPage({
                   <TableHead>Broker</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Submitted</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead className="pr-5 text-center">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -136,15 +136,21 @@ export default async function LeadsPage({
                       <StatusBadge status={lead.status} />
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
-                      {formatDateTime(lead.createdAt)}
+                      <TimeAgo value={lead.createdAt} />
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="pr-5 text-center">
                       {/* Only unsent leads can be assigned — a duplicate must
                         never reach a second broker. */}
                       {lead.status === "unsent" ? (
-                        <AssignLeadForm leadId={lead.id} brokers={assignable} />
+                        <AssignLeadForm
+                          leadId={lead.id}
+                          leadName={lead.name}
+                          brokers={assignable}
+                        />
                       ) : (
-                        <span className="text-muted-foreground text-xs">—</span>
+                        <span className="text-muted-foreground/60 text-sm">
+                          —
+                        </span>
                       )}
                     </TableCell>
                   </TableRow>

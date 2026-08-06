@@ -58,7 +58,7 @@ export default async function BrokersPage({
                       <TableHead>Timezone</TableHead>
                       <TableHead>Hours</TableHead>
                       <TableHead>Days</TableHead>
-                      <TableHead className="text-right">Daily cap</TableHead>
+                      <TableHead className="text-center">Daily cap</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -89,8 +89,20 @@ export default async function BrokersPage({
                         <TableCell className="text-muted-foreground text-sm">
                           {formatWorkingDays(broker.workingDays)}
                         </TableCell>
-                        <TableCell className="text-right tabular-nums">
-                          {broker.dailyCap === 0 ? "∞" : broker.dailyCap}
+                        <TableCell className="text-center">
+                          {broker.dailyCap === 0 ? (
+                            <span
+                              className="text-muted-foreground text-xl leading-none"
+                              title="Unlimited"
+                              aria-label="Unlimited"
+                            >
+                              ∞
+                            </span>
+                          ) : (
+                            <span className="text-lg font-medium tabular-nums">
+                              {broker.dailyCap}
+                            </span>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}

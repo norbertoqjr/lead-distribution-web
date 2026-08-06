@@ -16,6 +16,7 @@ import { AdminShell, EmptyState, PageHeader } from "@/components/admin/shell";
 import { StatCard } from "@/components/admin/stat-card";
 import { DashboardCard } from "@/components/admin/dashboard-card";
 import { StatusBadge } from "@/components/admin/status-badge";
+import { TimeAgo } from "@/components/admin/time-ago";
 import {
   Table,
   TableBody,
@@ -25,7 +26,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { formatDateTime } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Dashboard", robots: noIndex };
 export const dynamic = "force-dynamic";
@@ -173,7 +173,7 @@ export default async function DashboardPage() {
                         <StatusBadge status={lead.status} />
                       </TableCell>
                       <TableCell className="text-muted-foreground pr-5 text-sm">
-                        {formatDateTime(lead.createdAt)}
+                        <TimeAgo value={lead.createdAt} />
                       </TableCell>
                     </TableRow>
                   ))}

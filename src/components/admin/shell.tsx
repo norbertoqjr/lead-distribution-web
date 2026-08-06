@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { Route } from "lucide-react";
+import { ArrowLeft, Route } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { meSchema } from "@/lib/schemas";
 import { SidebarNav } from "./sidebar-nav";
 import { MobileNav } from "./mobile-nav";
 import { UserMenu } from "./user-menu";
+import { Toaster } from "@/components/ui/sonner";
 
 /**
  * Admin app shell: fixed sidebar, floating topbar, tinted content panel.
@@ -70,6 +71,8 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
+
+      <Toaster position="bottom-right" richColors closeButton />
     </div>
   );
 }
@@ -78,14 +81,26 @@ export function PageHeader({
   title,
   description,
   action,
+  back,
 }: {
   title: string;
   description?: string;
   action?: React.ReactNode;
+  /** Shown above the title on detail pages, so the list is one click away. */
+  back?: { href: string; label: string };
 }) {
   return (
     <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
       <div>
+        {back && (
+          <Link
+            href={back.href}
+            className="text-muted-foreground hover:text-foreground mb-2 -ml-1 inline-flex items-center gap-1.5 text-sm transition-colors"
+          >
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            {back.label}
+          </Link>
+        )}
         <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
           {title}
         </h1>
