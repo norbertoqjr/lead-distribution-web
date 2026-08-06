@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { noIndex } from "@/lib/seo";
 import { apiFetch } from "@/lib/api";
 import { formResponseSchema } from "@/lib/schemas";
 import { AdminShell, PageHeader } from "@/components/admin/shell";
@@ -6,7 +7,7 @@ import { CreateFormCard } from "@/components/admin/create-form-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDateTime } from "@/lib/format";
 
-export const metadata: Metadata = { title: "Lead form" };
+export const metadata: Metadata = { title: "Lead form", robots: noIndex };
 export const dynamic = "force-dynamic";
 
 export default async function FormPage() {

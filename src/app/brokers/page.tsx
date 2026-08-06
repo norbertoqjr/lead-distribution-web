@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { noIndex } from "@/lib/seo";
 import { z } from "zod";
 import { apiFetch } from "@/lib/api";
 import { brokerResponseSchema } from "@/lib/schemas";
@@ -17,7 +18,7 @@ import {
 } from "@/components/ui/table";
 import { formatWorkingDays, minutesToTime } from "@/lib/format";
 
-export const metadata: Metadata = { title: "Brokers" };
+export const metadata: Metadata = { title: "Brokers", robots: noIndex };
 export const dynamic = "force-dynamic";
 
 export default async function BrokersPage() {

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { noIndex } from "@/lib/seo";
 import { ArrowRight, Check, ExternalLink } from "lucide-react";
 import { z } from "zod";
 import { apiFetch } from "@/lib/api";
@@ -25,7 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 import { formatDateTime } from "@/lib/format";
 
-export const metadata: Metadata = { title: "Dashboard" };
+export const metadata: Metadata = { title: "Dashboard", robots: noIndex };
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {

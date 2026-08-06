@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { noIndex } from "@/lib/seo";
 import { z } from "zod";
 import { apiFetch } from "@/lib/api";
 import {
@@ -22,7 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 import { formatDateTime } from "@/lib/format";
 
-export const metadata: Metadata = { title: "Leads" };
+export const metadata: Metadata = { title: "Leads", robots: noIndex };
 export const dynamic = "force-dynamic";
 
 const FILTERS = ["all", "sent", "unsent", "duplicate", "failed"] as const;

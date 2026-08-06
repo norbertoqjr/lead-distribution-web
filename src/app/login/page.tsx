@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { noIndex } from "@/lib/seo";
 import { LoginForm } from "./login-form";
 
-export const metadata: Metadata = { title: "Sign in" };
+export const metadata: Metadata = { title: "Sign in", robots: noIndex };
 
 export default async function LoginPage({
   searchParams,

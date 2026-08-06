@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { noIndex } from "@/lib/seo";
 import { z } from "zod";
 import { apiFetch } from "@/lib/api";
 import {
@@ -23,7 +24,7 @@ import {
 } from "@/components/ui/table";
 import { formatDateTime } from "@/lib/format";
 
-export const metadata: Metadata = { title: "Distribution" };
+export const metadata: Metadata = { title: "Distribution", robots: noIndex };
 export const dynamic = "force-dynamic";
 
 export default async function DistributionPage() {
