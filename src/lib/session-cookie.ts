@@ -1,3 +1,15 @@
+/**
+ * Whether the session cookie may carry the Secure flag.
+ *
+ * A Secure cookie is silently dropped by the browser over plain HTTP, so
+ * setting it on an http origin logs the user in and immediately loses the
+ * session. NODE_ENV is the wrong signal — this deployment is production and
+ * http — so the public origin's own scheme decides.
+ */
+export function isSecureOrigin(): boolean {
+  return (process.env.NEXT_PUBLIC_SITE_URL ?? "").startsWith("https://");
+}
+
 export type CookieAction =
   { type: "none" } | { type: "set"; value: string } | { type: "clear" };
 
