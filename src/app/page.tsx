@@ -1,12 +1,7 @@
-import Link from "next/link";
-import { cookies } from "next/headers";
-import { Activity, ArrowRight, Clock, ShieldCheck, Users } from "lucide-react";
+import { Activity, Clock, ShieldCheck, Users } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-
-const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? "lds_session";
 
 /** The lead one gets the wide cell; the rest sit beneath it. */
 const lead = {
@@ -33,10 +28,7 @@ const capabilities = [
   },
 ];
 
-export default async function HomePage() {
-  const store = await cookies();
-  const signedIn = Boolean(store.get(SESSION_COOKIE)?.value);
-
+export default function HomePage() {
   return (
     <>
       <SiteHeader />
@@ -59,18 +51,6 @@ export default async function HomePage() {
               assigned by percentage share within each broker’s working hours
               and daily cap.
             </p>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild size="lg">
-                <Link href={signedIn ? "/dashboard" : "/login"}>
-                  {signedIn ? "Go to dashboard" : "Sign in to the admin"}
-                  <ArrowRight className="size-4" aria-hidden="true" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link href="/health">System health</Link>
-              </Button>
-            </div>
           </div>
         </section>
 
