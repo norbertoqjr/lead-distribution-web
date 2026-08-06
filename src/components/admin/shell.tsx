@@ -1,27 +1,20 @@
-import Link from 'next/link';
-import { Route } from 'lucide-react';
-import { z } from 'zod';
-import { apiFetch } from '@/lib/api';
-import { SidebarNav } from './sidebar-nav';
-import { MobileNav } from './mobile-nav';
-import { LogoutButton } from './logout-button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import Link from "next/link";
+import { Route } from "lucide-react";
+import { apiFetch } from "@/lib/api";
+import { meSchema } from "@/lib/schemas";
+import { SidebarNav } from "./sidebar-nav";
+import { MobileNav } from "./mobile-nav";
+import { UserMenu } from "./user-menu";
 
 /**
  * Admin app shell: fixed sidebar, floating topbar, tinted content panel.
  * Metrics come from docs/dashboard-design.json (layout.appShell, layout.sidebar,
  * layout.topbar, layout.content).
  */
-const meSchema = z.object({
-  id: z.number(),
-  email: z.string(),
-  name: z.string().nullable(),
-});
-
 /** Never throws: a failed profile lookup must not blank the whole shell. */
 async function currentUser() {
   try {
-    return await apiFetch('/auth/me', meSchema);
+    return await apiFetch("/auth/me", meSchema);
   } catch {
     return null;
   }
@@ -29,8 +22,6 @@ async function currentUser() {
 
 export async function AdminShell({ children }: { children: React.ReactNode }) {
   const user = await currentUser();
-  const label = user?.name ?? 'Admin';
-  const initials = label.slice(0, 2).toUpperCase();
 
   return (
     <div className="bg-background min-h-dvh p-2 lg:grid lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-2">
@@ -69,28 +60,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
             </Link>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-3">
-              <Avatar className="ring-background size-11 ring-2">
-                <AvatarFallback className="bg-accent text-accent-foreground font-semibold">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              {/* Metadata is hidden on mobile per responsive.mobile. */}
-              <div className="hidden sm:block">
-                <p className="text-[0.9375rem] leading-tight font-semibold">
-                  {label}
-                </p>
-                {user?.email && (
-                  <p className="text-muted-foreground text-[0.8125rem]">
-                    {user.email}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <LogoutButton />
-          </div>
+          <UserMenu name={user?.name ?? null} email={user?.email} />
         </header>
 
         <main
@@ -120,7 +90,9 @@ export function PageHeader({
           {title}
         </h1>
         {description && (
-          <p className="mt-2 text-[0.9375rem] text-muted-foreground">{description}</p>
+          <p className="mt-2 text-[0.9375rem] text-muted-foreground">
+            {description}
+          </p>
         )}
       </div>
       {action}

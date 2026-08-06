@@ -27,6 +27,39 @@ export const loginSchema = z.object({
 });
 export type LoginInput = z.infer<typeof loginSchema>;
 
+/**
+ * Profile edit. Email is absent on purpose: it is the login identifier, so the
+ * API refuses to change it and the form shows it read-only.
+ */
+export const profileSchema = z
+  .object({
+    name: trimmed.pipe(z.string().max(255)),
+    currentPassword: z.string().max(128),
+    newPassword: z.string().max(128),
+  })
+  .refine(
+    (data) => data.newPassword === '' || data.newPassword.length >= 8,
+    {
+      message: 'New password must be at least 8 characters',
+      path: ['newPassword'],
+    },
+  )
+  .refine(
+    (data) => data.newPassword === '' || data.currentPassword.length > 0,
+    {
+      message: 'Enter your current password to change it',
+      path: ['currentPassword'],
+    },
+  );
+export type ProfileInput = z.infer<typeof profileSchema>;
+
+export const meSchema = z.object({
+  id: z.number(),
+  email: z.string(),
+  name: z.string().nullable(),
+});
+export type Me = z.infer<typeof meSchema>;
+
 export const brokerSchema = z
   .object({
     name: trimmed.pipe(z.string().min(1, 'Name is required').max(255)),

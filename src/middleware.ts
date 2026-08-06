@@ -5,6 +5,7 @@ const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? 'lds_session';
 /** Admin areas. Everything else — the public form, /login — stays open. */
 const PROTECTED = [
   '/dashboard',
+  '/account',
   '/brokers',
   '/form',
   '/distribution',
