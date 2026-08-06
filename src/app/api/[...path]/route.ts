@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { readSessionCookie } from '@/lib/session-cookie';
 
 /**
  * Same-origin proxy to the backend.
@@ -75,19 +76,29 @@ async function forward(
     headers: { 'Content-Type': 'application/json' },
   });
 
-  // Login returns a Set-Cookie; reissue it on this origin so the browser holds
-  // a first-party httpOnly cookie and never learns the backend's address.
-  const setCookie = response.headers.get('set-cookie');
-  const value = setCookie
-    ? new RegExp(`${SESSION_COOKIE}=([^;]+)`).exec(setCookie)?.[1]
-    : undefined;
+  // Login and logout both answer with Set-Cookie; mirror it onto this origin
+  // so the browser holds a first-party httpOnly cookie and never learns the
+  // backend's address. The decision is a pure function so it can be tested
+  // without standing up both servers.
+  const action = readSessionCookie(
+    response.headers.get('set-cookie'),
+    SESSION_COOKIE,
+  );
 
-  if (value) {
-    proxied.cookies.set(SESSION_COOKIE, value, {
+  if (action.type === 'set') {
+    proxied.cookies.set(SESSION_COOKIE, action.value, {
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
       maxAge: 7 * 24 * 60 * 60,
+      path: '/',
+    });
+  } else if (action.type === 'clear') {
+    proxied.cookies.set(SESSION_COOKIE, '', {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 0,
       path: '/',
     });
   }
