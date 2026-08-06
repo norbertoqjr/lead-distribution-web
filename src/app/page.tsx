@@ -10,12 +10,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
+/** The lead one gets the wide cell; the rest sit beneath it. */
+const lead = {
+  icon: Users,
+  title: 'Fair broker share',
+  body: 'Each broker gets a target percentage. The next lead goes to whoever is furthest behind their share, so the split holds over time rather than only on average.',
+};
+
 const capabilities = [
-  {
-    icon: Users,
-    title: 'Fair broker share',
-    body: 'Each broker gets a target percentage. The next lead goes to whoever is furthest behind their share.',
-  },
   {
     icon: Clock,
     title: 'Timezone aware',
@@ -29,7 +31,7 @@ const capabilities = [
   {
     icon: Activity,
     title: 'Full audit trail',
-    body: 'Every lead is recorded with its captured IP address and status: sent, unsent, duplicate, or failed.',
+    body: 'Every lead is recorded with its captured IP address and status.',
   },
 ];
 
@@ -94,7 +96,23 @@ export default function HomePage() {
             How distribution works
           </h2>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Asymmetric on purpose: a row of identical cards flattens the
+              hierarchy and tells the reader nothing about what matters. */}
+          <div className="grid gap-4 lg:grid-cols-3">
+            <Card className="lg:col-span-3">
+              <CardContent className="flex flex-col gap-4 pt-6 sm:flex-row sm:items-start sm:gap-6">
+                <span className="bg-accent text-accent-foreground grid size-10 shrink-0 place-items-center rounded-md">
+                  <lead.icon className="size-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <h3 className="text-lg font-medium">{lead.title}</h3>
+                  <p className="text-muted-foreground mt-1 max-w-2xl text-sm">
+                    {lead.body}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
             {capabilities.map((item) => (
               <Card key={item.title}>
                 <CardContent className="pt-6">

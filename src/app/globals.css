@@ -119,9 +119,41 @@
       sans-serif;
   }
 
-  /* Never removed, only restyled — keyboard users depend on it. */
+  /* Never removed, only restyled. Keyboard users depend on it. */
   :focus-visible {
     @apply outline-ring outline-2 outline-offset-2;
+  }
+
+  /*
+   * Tailwind v4's preflight sets `cursor: default` on buttons, so every
+   * control in the app felt inert on hover. Restore the pointer on anything
+   * actually clickable, and signal refusal on anything that is not.
+   */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  a[href],
+  label[for],
+  select:not(:disabled),
+  summary,
+  [type='checkbox']:not(:disabled),
+  [type='radio']:not(:disabled),
+  [type='submit']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  select:disabled,
+  input:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
+  /* A press should feel like a press. 1px is enough to register. */
+  @media (prefers-reduced-motion: no-preference) {
+    button:not(:disabled):active,
+    [type='submit']:not(:disabled):active {
+      transform: translateY(1px);
+    }
   }
 }
 
