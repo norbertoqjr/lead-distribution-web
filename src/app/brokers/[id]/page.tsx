@@ -8,6 +8,7 @@ import {
   type Broker,
   type Lead,
 } from "@/lib/schemas";
+import { DashboardCard } from "@/components/admin/dashboard-card";
 import { AdminShell, EmptyState, PageHeader } from "@/components/admin/shell";
 import { StatusBadge } from "@/components/admin/status-badge";
 import {
@@ -62,46 +63,48 @@ export default async function BrokerDetailPage({
           description="Leads assigned to this broker will appear here."
         />
       ) : (
-        <div className="overflow-x-auto rounded-lg border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>IP address</TableHead>
-                <TableHead>Form</TableHead>
-                <TableHead>Received</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {leads.map((lead) => (
-                <TableRow key={lead.id}>
-                  <TableCell className="font-medium">{lead.name}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {lead.email}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {lead.phone ?? "—"}
-                  </TableCell>
-                  <TableCell className="font-mono text-xs tabular-nums">
-                    {lead.ipAddress}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {lead.formName}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {formatDateTime(lead.assignedAt)}
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge status={lead.status} />
-                  </TableCell>
+        <DashboardCard bodyClassName="px-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>IP address</TableHead>
+                  <TableHead>Form</TableHead>
+                  <TableHead>Received</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {leads.map((lead) => (
+                  <TableRow key={lead.id}>
+                    <TableCell className="font-medium">{lead.name}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {lead.email}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {lead.phone ?? "—"}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs tabular-nums">
+                      {lead.ipAddress}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {lead.formName}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {formatDateTime(lead.assignedAt)}
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={lead.status} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </DashboardCard>
       )}
     </AdminShell>
   );

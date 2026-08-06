@@ -1,17 +1,18 @@
-import type { Metadata } from 'next';
-import { z } from 'zod';
-import { apiFetch } from '@/lib/api';
+import type { Metadata } from "next";
+import { z } from "zod";
+import { apiFetch } from "@/lib/api";
 import {
   brokerResponseSchema,
   distributionResponseSchema,
   leadResponseSchema,
-} from '@/lib/schemas';
-import { AdminShell, EmptyState, PageHeader } from '@/components/admin/shell';
+} from "@/lib/schemas";
+import { DashboardCard } from "@/components/admin/dashboard-card";
+import { AdminShell, EmptyState, PageHeader } from "@/components/admin/shell";
 import {
   CreateDistribution,
   DistributionBrokers,
-} from '@/components/admin/distribution-setup';
-import { StatusBadge } from '@/components/admin/status-badge';
+} from "@/components/admin/distribution-setup";
+import { StatusBadge } from "@/components/admin/status-badge";
 import {
   Table,
   TableBody,
@@ -19,16 +20,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { formatDateTime } from '@/lib/format';
+} from "@/components/ui/table";
+import { formatDateTime } from "@/lib/format";
 
-export const metadata: Metadata = { title: 'Distribution' };
-export const dynamic = 'force-dynamic';
+export const metadata: Metadata = { title: "Distribution" };
+export const dynamic = "force-dynamic";
 
 export default async function DistributionPage() {
   const [distribution, brokers] = await Promise.all([
-    apiFetch('/distributions', distributionResponseSchema.nullable()),
-    apiFetch('/brokers', z.array(brokerResponseSchema)),
+    apiFetch("/distributions", distributionResponseSchema.nullable()),
+    apiFetch("/brokers", z.array(brokerResponseSchema)),
   ]);
 
   if (!distribution) {
@@ -74,44 +75,48 @@ export default async function DistributionPage() {
               description="Every lead that passes through this distribution appears here, including duplicates and failures."
             />
           ) : (
-            <div className="overflow-x-auto rounded-lg border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Lead</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>IP address</TableHead>
-                    <TableHead>Broker</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Submitted</TableHead>
-                    <TableHead>Note</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {leads.map((lead) => (
-                    <TableRow key={lead.id}>
-                      <TableCell className="font-medium">{lead.name}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {lead.email}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs tabular-nums">
-                        {lead.ipAddress}
-                      </TableCell>
-                      <TableCell>{lead.broker?.name ?? '—'}</TableCell>
-                      <TableCell>
-                        <StatusBadge status={lead.status} />
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {formatDateTime(lead.createdAt)}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {lead.note ?? '—'}
-                      </TableCell>
+            <DashboardCard bodyClassName="px-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Lead</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>IP address</TableHead>
+                      <TableHead>Broker</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Submitted</TableHead>
+                      <TableHead>Note</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {leads.map((lead) => (
+                      <TableRow key={lead.id}>
+                        <TableCell className="font-medium">
+                          {lead.name}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {lead.email}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs tabular-nums">
+                          {lead.ipAddress}
+                        </TableCell>
+                        <TableCell>{lead.broker?.name ?? "—"}</TableCell>
+                        <TableCell>
+                          <StatusBadge status={lead.status} />
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {formatDateTime(lead.createdAt)}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {lead.note ?? "—"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </DashboardCard>
           )}
         </section>
       </div>

@@ -1,84 +1,72 @@
 @import 'tailwindcss';
 
 /*
- * shadcn token layer. Components reference semantic names only, so a theme
- * change happens here and nowhere else. Light and dark are authored as
- * separate tonal palettes rather than inverted values, and both were checked
- * against WCAG AA (4.5:1 body text, 3:1 UI).
+ * Theme tokens. Single source of truth is docs/dashboard-design.json — values
+ * below are transcribed from its `shadcn.cssVariables`, `colors`, `radius`,
+ * `shadows`, and `motion` blocks. Change the JSON first, then mirror it here.
+ *
+ * The design specifies mode: "light", so there is no dark palette. A partial
+ * dark theme is worse than none: half the surfaces would keep light values and
+ * the contrast guarantees would not hold.
  */
 :root {
-  --background: #ffffff;
-  --foreground: #12181f;
-  --card: #ffffff;
-  --card-foreground: #12181f;
-  --popover: #ffffff;
-  --popover-foreground: #12181f;
-  --primary: #1f56d6;
-  --primary-foreground: #ffffff;
-  --secondary: #f1f4f8;
-  --secondary-foreground: #12181f;
-  --muted: #f6f8fa;
-  --muted-foreground: #5a6672;
-  --accent: #eaf0fe;
-  --accent-foreground: #1f56d6;
-  --destructive: #a5231c;
-  --destructive-foreground: #ffffff;
-  --success: #12694a;
-  --warning: #8a5300;
-  --border: #d8dee4;
-  --input: #d8dee4;
-  --ring: #1f56d6;
-  --radius: 0.5rem;
-}
+  color-scheme: light;
 
-.dark {
-  --background: #0d1117;
-  --foreground: #e8edf3;
-  --card: #161b22;
-  --card-foreground: #e8edf3;
-  --popover: #161b22;
-  --popover-foreground: #e8edf3;
-  --primary: #7aa2ff;
-  --primary-foreground: #0d1117;
-  --secondary: #1c232c;
-  --secondary-foreground: #e8edf3;
-  --muted: #161b22;
-  --muted-foreground: #9aa7b4;
-  --accent: #182338;
-  --accent-foreground: #9bb8ff;
-  --destructive: #ff8b82;
-  --destructive-foreground: #0d1117;
-  --success: #5fd3a2;
-  --warning: #e5b567;
-  --border: #2b3440;
-  --input: #2b3440;
-  --ring: #7aa2ff;
-}
+  --background: hsl(120 11% 96%);
+  --foreground: hsl(140 9% 7%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(140 9% 7%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(140 9% 7%);
+  --primary: hsl(153 65% 25%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(140 18% 95%);
+  --secondary-foreground: hsl(153 56% 20%);
+  --muted: hsl(140 12% 95%);
+  --muted-foreground: hsl(145 6% 56%);
+  --accent: hsl(145 31% 93%);
+  --accent-foreground: hsl(153 65% 25%);
+  --destructive: hsl(0 78% 61%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(140 11% 91%);
+  --input: hsl(140 11% 91%);
+  --ring: hsl(153 65% 25%);
 
-@media (prefers-color-scheme: dark) {
-  :root:not(.light) {
-    --background: #0d1117;
-    --foreground: #e8edf3;
-    --card: #161b22;
-    --card-foreground: #e8edf3;
-    --popover: #161b22;
-    --popover-foreground: #e8edf3;
-    --primary: #7aa2ff;
-    --primary-foreground: #0d1117;
-    --secondary: #1c232c;
-    --secondary-foreground: #e8edf3;
-    --muted: #161b22;
-    --muted-foreground: #9aa7b4;
-    --accent: #182338;
-    --accent-foreground: #9bb8ff;
-    --destructive: #ff8b82;
-    --destructive-foreground: #0d1117;
-    --success: #5fd3a2;
-    --warning: #e5b567;
-    --border: #2b3440;
-    --input: #2b3440;
-    --ring: #7aa2ff;
-  }
+  /* Status. Each pairs a readable text colour with a tinted surface. */
+  --success: #258657;
+  --success-foreground: #ffffff;
+  --success-muted: #e6f5ec;
+  --warning: #c59626;
+  --warning-foreground: #322400;
+  --warning-muted: #fff6d9;
+  --danger: #e76767;
+  --danger-foreground: #ffffff;
+  --danger-muted: #fdeaea;
+  --info: #4379e8;
+  --info-foreground: #ffffff;
+  --info-muted: #eaf0ff;
+
+  --chart-1: hsl(153 65% 25%);
+  --chart-2: hsl(151 57% 34%);
+  --chart-3: hsl(148 43% 56%);
+  --chart-4: hsl(145 44% 75%);
+  --chart-5: hsl(143 24% 88%);
+
+  /* layout.content background: a hair lighter than the page. */
+  --content: #f8faf8;
+
+  --radius: 1rem;
+
+  --shadow-card:
+    0 1px 2px rgb(16 19 17 / 0.02), 0 8px 24px rgb(16 19 17 / 0.025);
+  --shadow-card-hover: 0 8px 28px rgb(16 19 17 / 0.045);
+  --shadow-floating: 0 12px 34px rgb(16 19 17 / 0.08);
+  --shadow-button: 0 8px 18px rgb(23 107 69 / 0.16);
+
+  --motion-fast: 150ms;
+  --motion-default: 200ms;
+  --motion-slow: 300ms;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 @theme inline {
@@ -98,14 +86,34 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 2px);
-  --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) + 2px);
+  --color-content: var(--content);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-muted: var(--success-muted);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-muted: var(--warning-muted);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-muted: var(--danger-muted);
+  --color-info: var(--info);
+  --color-info-muted: var(--info-muted);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: 0.625rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.125rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 1.75rem;
 }
 
 @layer base {
@@ -115,8 +123,19 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    font-family:
+      Inter, Geist, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
       sans-serif;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    margin: 0;
+    line-height: 1.3;
   }
 
   /* Never removed, only restyled. Keyboard users depend on it. */
@@ -126,8 +145,7 @@
 
   /*
    * Tailwind v4's preflight sets `cursor: default` on buttons, so every
-   * control in the app felt inert on hover. Restore the pointer on anything
-   * actually clickable, and signal refusal on anything that is not.
+   * control would otherwise feel inert on hover.
    */
   button:not(:disabled),
   [role='button']:not([aria-disabled='true']),
@@ -148,11 +166,28 @@
     cursor: not-allowed;
   }
 
-  /* A press should feel like a press. 1px is enough to register. */
+  /* buttonActiveScale from the motion block. */
   @media (prefers-reduced-motion: no-preference) {
     button:not(:disabled):active,
     [type='submit']:not(:disabled):active {
-      transform: translateY(1px);
+      transform: scale(0.98);
+    }
+  }
+}
+
+@layer components {
+  /* card.hover: a soft lift, no heavy drop shadow. */
+  .card-interactive {
+    transition:
+      box-shadow var(--motion-default) var(--ease),
+      transform var(--motion-default) var(--ease),
+      border-color var(--motion-default) var(--ease);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .card-interactive:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-card-hover);
     }
   }
 }

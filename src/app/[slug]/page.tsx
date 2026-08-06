@@ -1,10 +1,10 @@
-import { notFound } from 'next/navigation';
-import type { Metadata } from 'next';
-import { z } from 'zod';
-import { PublicLeadForm } from '@/components/public-lead-form';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { z } from "zod";
+import { PublicLeadForm } from "@/components/public-lead-form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 const publicFormSchema = z.object({ name: z.string(), slug: z.string() });
 
@@ -19,7 +19,7 @@ async function getForm(slug: string) {
   try {
     const response = await fetch(
       `${url}/api/public/forms/${encodeURIComponent(slug)}`,
-      { cache: 'no-store' },
+      { cache: "no-store" },
     );
 
     if (!response.ok) return null;
@@ -38,7 +38,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const form = await getForm(slug);
-  return { title: form?.name ?? 'Form' };
+  return { title: form?.name ?? "Form" };
 }
 
 export default async function PublicFormPage({
@@ -52,7 +52,10 @@ export default async function PublicFormPage({
   if (!form) notFound();
 
   return (
-    <main id="main" className="mx-auto flex min-h-dvh max-w-md items-center px-6 py-12">
+    <main
+      id="main"
+      className="mx-auto flex min-h-dvh max-w-md items-center px-6 py-12"
+    >
       <Card className="w-full">
         <CardHeader>
           <CardTitle>{form.name}</CardTitle>

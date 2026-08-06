@@ -1,113 +1,250 @@
-import Link from 'next/link';
-import type { Metadata } from 'next';
-import { z } from 'zod';
-import { apiFetch } from '@/lib/api';
+import Link from "next/link";
+import type { Metadata } from "next";
+import { ArrowRight, Check, ExternalLink } from "lucide-react";
+import { z } from "zod";
+import { apiFetch } from "@/lib/api";
 import {
   brokerResponseSchema,
   distributionResponseSchema,
   formResponseSchema,
+  leadResponseSchema,
   summarySchema,
-} from '@/lib/schemas';
-import { AdminShell, PageHeader } from '@/components/admin/shell';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+} from "@/lib/schemas";
+import { AdminShell, EmptyState, PageHeader } from "@/components/admin/shell";
+import { StatCard } from "@/components/admin/stat-card";
+import { DashboardCard } from "@/components/admin/dashboard-card";
+import { StatusBadge } from "@/components/admin/status-badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import { formatDateTime } from "@/lib/format";
 
-export const metadata: Metadata = { title: 'Dashboard' };
-export const dynamic = 'force-dynamic';
+export const metadata: Metadata = { title: "Dashboard" };
+export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  // Fetched in parallel: four sequential round trips would be four times the
+  // Fetched in parallel: five sequential round trips would be five times the
   // latency for no benefit.
-  const [summary, brokers, form, distribution] = await Promise.all([
-    apiFetch('/leads/summary', summarySchema),
-    apiFetch('/brokers', z.array(brokerResponseSchema)),
-    apiFetch('/forms', formResponseSchema.nullable()),
-    apiFetch('/distributions', distributionResponseSchema.nullable()),
+  const [summary, brokers, form, distribution, leads] = await Promise.all([
+    apiFetch("/leads/summary", summarySchema),
+    apiFetch("/brokers", z.array(brokerResponseSchema)),
+    apiFetch("/forms", formResponseSchema.nullable()),
+    apiFetch("/distributions", distributionResponseSchema.nullable()),
+    apiFetch("/leads", z.array(leadResponseSchema)),
   ]);
 
-  const stats = [
-    { label: 'Total leads', value: summary.total },
-    { label: 'Sent', value: summary.sent },
-    { label: 'Unsent', value: summary.unsent },
-    { label: 'Duplicate', value: summary.duplicate },
-    { label: 'Failed', value: summary.failed },
-  ];
+  const routed =
+    summary.total > 0 ? Math.round((summary.sent / summary.total) * 100) : 0;
 
-  const setup = [
+  const steps = [
     {
-      label: 'Brokers',
+      label: "Create brokers",
       done: brokers.length > 0,
-      detail: `${brokers.length} created`,
-      href: '/brokers',
+      detail:
+        brokers.length > 0
+          ? `${brokers.length} broker${brokers.length === 1 ? "" : "s"}`
+          : "Nobody can receive leads yet",
+      href: "/brokers",
     },
     {
-      label: 'Lead form',
+      label: "Create the lead form",
       done: Boolean(form),
-      detail: form ? `/${form.slug}` : 'Not created',
-      href: '/form',
+      detail: form ? `Live at /${form.slug}` : "No public form yet",
+      href: "/form",
     },
     {
-      label: 'Distribution',
+      label: "Create the distribution",
       done: Boolean(distribution),
       detail: distribution
-        ? `${distribution.brokers.length} brokers`
-        : 'Not created',
-      href: '/distribution',
+        ? `${distribution.brokers.length} broker${
+            distribution.brokers.length === 1 ? "" : "s"
+          } included`
+        : "Leads will be saved as unsent",
+      href: "/distribution",
     },
   ];
+
+  // The first incomplete step is the one thing to do next.
+  const nextStep = steps.find((step) => !step.done);
+  const recent = leads.slice(0, 5);
 
   return (
     <AdminShell>
       <PageHeader
         title="Dashboard"
-        description="Lead volume and setup status at a glance."
+        description="Lead volume, setup status, and the latest submissions."
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {stats.map((stat) => (
-          <Card key={stat.label}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-muted-foreground text-sm font-medium">
-                {stat.label}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* Tabular figures stop the numbers jittering as they change. */}
-              <p className="text-3xl font-semibold tabular-nums">
-                {stat.value}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Tiles link into the leads page pre-filtered: seeing 3 unsent leads and
+          having to go find them is a wasted click. */}
+      <div className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          featured
+          label="Total leads"
+          value={summary.total}
+          meta={
+            summary.total > 0
+              ? `${routed}% routed to a broker`
+              : "No submissions yet"
+          }
+          href="/leads"
+        />
+        <StatCard
+          label="Sent"
+          value={summary.sent}
+          meta="Assigned to a broker"
+          href="/leads?status=sent"
+        />
+        <StatCard
+          label="Unsent"
+          value={summary.unsent}
+          meta={
+            summary.unsent > 0 ? "Waiting to be assigned" : "Nothing waiting"
+          }
+          href="/leads?status=unsent"
+          alert={summary.unsent > 0}
+        />
+        <StatCard
+          label="Duplicate"
+          value={summary.duplicate}
+          meta="Blocked from reassignment"
+          href="/leads?status=duplicate"
+        />
       </div>
 
-      <h2 className="text-muted-foreground mt-10 mb-4 text-xs font-semibold tracking-wider uppercase">
-        Setup
-      </h2>
+      <div className="mt-3.5 grid gap-3.5 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <DashboardCard
+          title="Latest leads"
+          action={
+            leads.length > 5 ? (
+              <Link
+                href="/leads"
+                className="text-primary text-sm font-medium hover:underline"
+              >
+                View all {leads.length}
+              </Link>
+            ) : undefined
+          }
+          bodyClassName="px-0"
+        >
+          {recent.length === 0 ? (
+            <div className="px-5">
+              <EmptyState
+                title="No leads yet"
+                description={
+                  form
+                    ? "Share the public form URL to start collecting."
+                    : "Create the lead form to start collecting."
+                }
+              />
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="pl-5">Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Broker</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="pr-5">Received</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recent.map((lead) => (
+                    <TableRow key={lead.id}>
+                      <TableCell className="pl-5 font-medium">
+                        {lead.name}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {lead.email}
+                      </TableCell>
+                      <TableCell>{lead.broker?.name ?? "—"}</TableCell>
+                      <TableCell>
+                        <StatusBadge status={lead.status} />
+                      </TableCell>
+                      <TableCell className="text-muted-foreground pr-5 text-sm">
+                        {formatDateTime(lead.createdAt)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </DashboardCard>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        {setup.map((step) => (
-          <Link key={step.label} href={step.href} className="rounded-lg">
-            <Card className="hover:border-ring h-full transition-colors">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-medium">{step.label}</p>
-                  <span
-                    className={
-                      step.done
-                        ? 'text-success text-xs font-semibold'
-                        : 'text-warning text-xs font-semibold'
-                    }
+        <div className="flex flex-col gap-3.5">
+          <DashboardCard title="Setup" bodyClassName="px-0">
+            <ol>
+              {steps.map((step) => (
+                <li key={step.label}>
+                  <Link
+                    href={step.href}
+                    className="hover:bg-secondary/60 flex items-start gap-3 px-5 py-3 transition-colors"
                   >
-                    {step.done ? 'Ready' : 'Pending'}
-                  </span>
-                </div>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  {step.detail}
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+                    <span
+                      className={cn(
+                        "mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border",
+                        step.done
+                          ? "bg-success-muted text-success border-transparent"
+                          : "text-muted-foreground",
+                      )}
+                    >
+                      {step.done && (
+                        <Check className="size-3" aria-hidden="true" />
+                      )}
+                    </span>
+
+                    <span className="min-w-0">
+                      <span className="block text-sm font-medium">
+                        {step.label}
+                      </span>
+                      <span className="text-muted-foreground block text-[0.6875rem]">
+                        {step.detail}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+
+            {nextStep && (
+              <div className="px-5 pt-2">
+                <Link
+                  href={nextStep.href}
+                  className="text-primary inline-flex items-center gap-1.5 text-sm font-medium hover:underline"
+                >
+                  Next: {nextStep.label}
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+              </div>
+            )}
+          </DashboardCard>
+
+          {/* Once the form exists, its public URL is the thing the admin hands
+              out, so surface it rather than hiding it a page away. */}
+          {form && (
+            <DashboardCard title="Public form">
+              <p className="text-sm font-medium">{form.name}</p>
+              <a
+                href={`/${form.slug}`}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="text-primary mt-1 inline-flex items-center gap-1.5 font-mono text-xs hover:underline"
+              >
+                /{form.slug}
+                <ExternalLink className="size-3" aria-hidden="true" />
+              </a>
+            </DashboardCard>
+          )}
+        </div>
       </div>
     </AdminShell>
   );

@@ -1,18 +1,18 @@
-import type { Metadata, Viewport } from 'next';
-import './globals.css';
+import type { Metadata, Viewport } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: 'Lead Distribution Platform',
-    template: '%s · Lead Distribution Platform',
+    default: "Lead Distribution Platform",
+    template: "%s · Lead Distribution Platform",
   },
   description:
-    'Capture leads from a public form and route them to the right broker by percentage share, timezone, open hours, and daily cap.',
+    "Capture leads from a public form and route them to the right broker by percentage share, timezone, open hours, and daily cap.",
 };
 
 // initialScale without maximumScale: pinch-zoom stays available.
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
 };
 
