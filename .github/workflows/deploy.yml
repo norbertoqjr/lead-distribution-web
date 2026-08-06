@@ -34,48 +34,54 @@ jobs:
     needs: verify
     runs-on: ubuntu-latest
     steps:
+      # Configuration is NOT written from here. The .env file lives on the VPS,
+      # created once by hand, so BACKEND_URL and the session cookie name never
+      # leave the server. GitHub holds SSH access and nothing else.
+      #
+      # This is safe across redeploys because .env is gitignored and the script
+      # uses `git reset --hard`, which leaves untracked files alone. There is
+      # deliberately no `git clean` anywhere below.
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          # Key, not VPS_PASSWORD: CI access can then be revoked by removing a
-          # line from authorized_keys, without changing the account password.
+          # Key, not the account password: CI access can then be revoked by
+          # removing a line from authorized_keys.
           key: ${{ secrets.VPS_SSH_KEY }}
           script_stop: true
-          envs: WEB_PORT,API_PORT,VPS_HOST
           script: |
             set -euo pipefail
 
-            # Actions runs a non-interactive shell, which skips .bashrc, so nvm
-            # has to be sourced explicitly or node is not on PATH.
+            # Actions opens a non-interactive shell, which skips .bashrc, so
+            # nvm has to be sourced explicitly or node is not on PATH.
             export NVM_DIR="$HOME/.nvm"
             . "$NVM_DIR/nvm.sh"
 
             APP=~/apps/lds-web
 
             if [ ! -d "$APP/.git" ]; then
-              mkdir -p ~/apps
-              git clone https://github.com/norbertoqjr/lead-distribution-web.git "$APP"
+              echo "ERROR: $APP is not a git checkout." >&2
+              echo "Run the one-time bootstrap first — see docs/DEPLOYMENT.md" >&2
+              exit 1
             fi
 
             cd "$APP"
             git fetch --all --prune
             git reset --hard origin/main
 
-            # BACKEND_URL stays on loopback and carries no NEXT_PUBLIC_ prefix,
-            # so the private port is never inlined into the browser bundle.
-            cat > .env <<ENV
-            NODE_ENV=production
-            PORT=${WEB_PORT}
-            BACKEND_URL=http://127.0.0.1:${API_PORT}
-            SESSION_COOKIE_NAME=lds_session
-            NEXT_PUBLIC_SITE_URL=http://${VPS_HOST}:${WEB_PORT}
-            ENV
-            chmod 600 .env
+            if [ ! -f .env ]; then
+              echo "ERROR: .env missing at $APP" >&2
+              echo "Create it once from .env.example — see docs/DEPLOYMENT.md" >&2
+              exit 1
+            fi
 
-            npm ci
-            npm run build
+            for key in PORT BACKEND_URL SESSION_COOKIE_NAME NEXT_PUBLIC_SITE_URL; do
+              grep -q "^${key}=" .env || {
+                echo "ERROR: $key missing from $APP/.env" >&2
+                exit 1
+              }
+            done
 
             # PORT must be in the process environment before pm2 starts the
             # process. package.json runs `next start -p ${PORT:-8192}`, and the
@@ -85,6 +91,9 @@ jobs:
             . ./.env
             set +a
 
+            npm ci
+            npm run build
+
             pm2 restart lds-web --update-env \
               || pm2 start npm --name lds-web -- start
             pm2 save
@@ -92,13 +101,9 @@ jobs:
             # Give Next a moment to bind before probing.
             sleep 4
             curl -fsS -o /dev/null -w 'homepage %{http_code}\n' \
-              "http://127.0.0.1:${WEB_PORT}/"
+              "http://127.0.0.1:${PORT}/"
 
             if command -v ss >/dev/null 2>&1; then
               echo "--- listeners ---"
-              ss -tln | grep -E ":${WEB_PORT}|:${API_PORT}" || true
+              ss -tln | grep -E ":${PORT}" || true
             fi
-        env:
-          WEB_PORT: ${{ secrets.WEB_PORT }}
-          API_PORT: ${{ secrets.API_PORT }}
-          VPS_HOST: ${{ secrets.VPS_HOST }}
