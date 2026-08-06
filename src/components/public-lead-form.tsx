@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckCircle2 } from 'lucide-react';
-import { http, toMessage } from '@/lib/http';
-import { leadFormSchema, type LeadFormInput } from '@/lib/schemas';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { FieldError, FormError } from '@/components/admin/field-error';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CheckCircle2 } from "lucide-react";
+import { http, toMessage } from "@/lib/http";
+import { leadFormSchema, type LeadFormInput } from "@/lib/schemas";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { FieldError, FormError } from "@/components/admin/field-error";
 
 export function PublicLeadForm({ slug }: { slug: string }) {
   const [formError, setFormError] = useState<string>();
@@ -21,8 +21,8 @@ export function PublicLeadForm({ slug }: { slug: string }) {
     formState: { errors, isSubmitting },
   } = useForm<LeadFormInput>({
     resolver: zodResolver(leadFormSchema),
-    mode: 'onBlur',
-    defaultValues: { name: '', email: '', phone: '' },
+    mode: "onBlur",
+    defaultValues: { name: "", email: "", phone: "" },
   });
 
   const onSubmit = handleSubmit(async (values) => {
@@ -68,7 +68,7 @@ export function PublicLeadForm({ slug }: { slug: string }) {
           autoComplete="name"
           aria-invalid={Boolean(errors.name)}
           className="mt-1.5"
-          {...register('name')}
+          {...register("name")}
         />
         <FieldError message={errors.name?.message} />
       </div>
@@ -82,7 +82,7 @@ export function PublicLeadForm({ slug }: { slug: string }) {
           autoComplete="email"
           aria-invalid={Boolean(errors.email)}
           className="mt-1.5"
-          {...register('email')}
+          {...register("email")}
         />
         <FieldError message={errors.email?.message} />
       </div>
@@ -96,13 +96,13 @@ export function PublicLeadForm({ slug }: { slug: string }) {
           type="tel"
           autoComplete="tel"
           className="mt-1.5"
-          {...register('phone')}
+          {...register("phone")}
         />
         <FieldError message={errors.phone?.message} />
       </div>
 
       <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Sending…' : 'Submit'}
+        {isSubmitting ? "Sending…" : "Submit"}
       </Button>
     </form>
   );

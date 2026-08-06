@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   FileText,
   LayoutDashboard,
@@ -9,8 +9,8 @@ import {
   Users,
   Inbox,
   type LucideIcon,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type NavItem = {
   href: string;
@@ -19,11 +19,11 @@ type NavItem = {
 };
 
 export const NAV_ITEMS: NavItem[] = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/brokers', label: 'Brokers', icon: Users },
-  { href: '/form', label: 'Lead form', icon: FileText },
-  { href: '/distribution', label: 'Distribution', icon: Share2 },
-  { href: '/leads', label: 'Leads', icon: Inbox },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/brokers", label: "Brokers", icon: Users },
+  { href: "/form", label: "Lead form", icon: FileText },
+  { href: "/distribution", label: "Distribution", icon: Share2 },
+  { href: "/leads", label: "Leads", icon: Inbox },
 ];
 
 /**
@@ -45,12 +45,12 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
             key={item.href}
             href={item.href}
             onClick={onNavigate}
-            aria-current={active ? 'page' : undefined}
+            aria-current={active ? "page" : undefined}
             className={cn(
-              'relative flex h-11.5 items-center gap-3 rounded-[0.875rem] px-3 text-[0.9375rem] transition-colors',
+              "relative flex h-11.5 items-center gap-3 rounded-[0.875rem] px-3 text-[0.9375rem] transition-colors",
               active
-                ? 'text-foreground font-semibold'
-                : 'text-muted-foreground hover:bg-secondary hover:text-primary font-medium',
+                ? "text-foreground font-semibold"
+                : "text-muted-foreground hover:bg-secondary hover:text-primary font-medium",
             )}
           >
             {active && (

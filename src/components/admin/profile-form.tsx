@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckCircle2, Lock } from 'lucide-react';
-import { http, toMessage } from '@/lib/http';
-import { profileSchema, type Me, type ProfileInput } from '@/lib/schemas';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { DashboardCard } from './dashboard-card';
-import { FieldError, FormError } from './field-error';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CheckCircle2, Lock } from "lucide-react";
+import { http, toMessage } from "@/lib/http";
+import { profileSchema, type Me, type ProfileInput } from "@/lib/schemas";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { DashboardCard } from "./dashboard-card";
+import { FieldError, FormError } from "./field-error";
 
 export function ProfileForm({ user }: { user: Me }) {
   const router = useRouter();
@@ -25,11 +25,11 @@ export function ProfileForm({ user }: { user: Me }) {
     formState: { errors, isSubmitting },
   } = useForm<ProfileInput>({
     resolver: zodResolver(profileSchema),
-    mode: 'onBlur',
+    mode: "onBlur",
     defaultValues: {
-      name: user.name ?? '',
-      currentPassword: '',
-      newPassword: '',
+      name: user.name ?? "",
+      currentPassword: "",
+      newPassword: "",
     },
   });
 
@@ -38,7 +38,7 @@ export function ProfileForm({ user }: { user: Me }) {
     setSaved(false);
 
     try {
-      await http.patch('/auth/me', {
+      await http.patch("/auth/me", {
         name: values.name,
         // Password fields are only sent when a new one was actually typed.
         ...(values.newPassword
@@ -50,7 +50,7 @@ export function ProfileForm({ user }: { user: Me }) {
       });
 
       // Clear the password fields so they are not left filled on screen.
-      reset({ name: values.name, currentPassword: '', newPassword: '' });
+      reset({ name: values.name, currentPassword: "", newPassword: "" });
       setSaved(true);
       router.refresh();
     } catch (error) {
@@ -81,7 +81,7 @@ export function ProfileForm({ user }: { user: Me }) {
               autoComplete="name"
               aria-invalid={Boolean(errors.name)}
               className="mt-1.5"
-              {...register('name')}
+              {...register("name")}
             />
             <FieldError message={errors.name?.message} />
           </div>
@@ -126,7 +126,7 @@ export function ProfileForm({ user }: { user: Me }) {
               autoComplete="current-password"
               aria-invalid={Boolean(errors.currentPassword)}
               className="mt-1.5"
-              {...register('currentPassword')}
+              {...register("currentPassword")}
             />
             <FieldError message={errors.currentPassword?.message} />
           </div>
@@ -139,7 +139,7 @@ export function ProfileForm({ user }: { user: Me }) {
               autoComplete="new-password"
               aria-invalid={Boolean(errors.newPassword)}
               className="mt-1.5"
-              {...register('newPassword')}
+              {...register("newPassword")}
             />
             <FieldError message={errors.newPassword?.message} />
           </div>
@@ -148,7 +148,7 @@ export function ProfileForm({ user }: { user: Me }) {
 
       <div>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving…' : 'Save changes'}
+          {isSubmitting ? "Saving…" : "Save changes"}
         </Button>
       </div>
     </form>

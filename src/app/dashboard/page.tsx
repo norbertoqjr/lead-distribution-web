@@ -2,13 +2,14 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { noIndex } from "@/lib/seo";
 import { ArrowRight, Check, ExternalLink } from "lucide-react";
-import { z } from "zod";
 import { apiFetch } from "@/lib/api";
+import { ALL } from "@/lib/paging";
 import {
   brokerResponseSchema,
   distributionResponseSchema,
   formResponseSchema,
   leadResponseSchema,
+  paginatedSchema,
   summarySchema,
 } from "@/lib/schemas";
 import { AdminShell, EmptyState, PageHeader } from "@/components/admin/shell";
@@ -34,10 +35,10 @@ export default async function DashboardPage() {
   // latency for no benefit.
   const [summary, brokers, form, distribution, leads] = await Promise.all([
     apiFetch("/leads/summary", summarySchema),
-    apiFetch("/brokers", z.array(brokerResponseSchema)),
+    apiFetch(`/brokers?${ALL}`, paginatedSchema(brokerResponseSchema)),
     apiFetch("/forms", formResponseSchema.nullable()),
     apiFetch("/distributions", distributionResponseSchema.nullable()),
-    apiFetch("/leads", z.array(leadResponseSchema)),
+    apiFetch("/leads?page=1&perPage=5", paginatedSchema(leadResponseSchema)),
   ]);
 
   const routed =
@@ -46,10 +47,10 @@ export default async function DashboardPage() {
   const steps = [
     {
       label: "Create brokers",
-      done: brokers.length > 0,
+      done: brokers.total > 0,
       detail:
-        brokers.length > 0
-          ? `${brokers.length} broker${brokers.length === 1 ? "" : "s"}`
+        brokers.total > 0
+          ? `${brokers.total} broker${brokers.total === 1 ? "" : "s"}`
           : "Nobody can receive leads yet",
       href: "/brokers",
     },
@@ -73,7 +74,8 @@ export default async function DashboardPage() {
 
   // The first incomplete step is the one thing to do next.
   const nextStep = steps.find((step) => !step.done);
-  const recent = leads.slice(0, 5);
+  // The API already returns just the five most recent.
+  const recent = leads.data;
 
   return (
     <AdminShell>
@@ -123,12 +125,12 @@ export default async function DashboardPage() {
         <DashboardCard
           title="Latest leads"
           action={
-            leads.length > 5 ? (
+            summary.total > recent.length ? (
               <Link
                 href="/leads"
                 className="text-primary text-sm font-medium hover:underline"
               >
-                View all {leads.length}
+                View all {summary.total}
               </Link>
             ) : undefined
           }

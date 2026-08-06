@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { http, toMessage } from '@/lib/http';
-import { formSchema, type FormInput } from '@/lib/schemas';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FieldError, FormError } from './field-error';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { http, toMessage } from "@/lib/http";
+import { formSchema, type FormInput } from "@/lib/schemas";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FieldError, FormError } from "./field-error";
 
 export function CreateFormCard() {
   const router = useRouter();
@@ -22,15 +22,15 @@ export function CreateFormCard() {
     formState: { errors, isSubmitting },
   } = useForm<FormInput>({
     resolver: zodResolver(formSchema),
-    mode: 'onBlur',
-    defaultValues: { name: '', slug: '' },
+    mode: "onBlur",
+    defaultValues: { name: "", slug: "" },
   });
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(undefined);
 
     try {
-      await http.post('/forms', values);
+      await http.post("/forms", values);
       router.refresh();
     } catch (error) {
       setFormError(toMessage(error));
@@ -52,7 +52,7 @@ export function CreateFormCard() {
               id="name"
               className="mt-1.5"
               aria-invalid={Boolean(errors.name)}
-              {...register('name')}
+              {...register("name")}
             />
             <FieldError message={errors.name?.message} />
           </div>
@@ -64,7 +64,7 @@ export function CreateFormCard() {
               className="mt-1.5"
               aria-describedby="slug-hint"
               aria-invalid={Boolean(errors.slug)}
-              {...register('slug')}
+              {...register("slug")}
             />
             <p id="slug-hint" className="text-muted-foreground mt-1 text-xs">
               Lowercase letters, numbers and hyphens. The form will live at
@@ -74,7 +74,7 @@ export function CreateFormCard() {
           </div>
 
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating…' : 'Create form'}
+            {isSubmitting ? "Creating…" : "Create form"}
           </Button>
         </form>
       </CardContent>

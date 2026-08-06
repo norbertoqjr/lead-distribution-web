@@ -65,7 +65,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
 
         <main
           id="main"
-          className="min-h-[calc(100dvh-6.5rem)] bg-content rounded-3xl p-4 sm:p-6"
+          className="bg-content min-h-[calc(100dvh-6.5rem)] rounded-3xl p-4 sm:p-6"
         >
           {children}
         </main>
@@ -90,7 +90,7 @@ export function PageHeader({
           {title}
         </h1>
         {description && (
-          <p className="mt-2 text-[0.9375rem] text-muted-foreground">
+          <p className="text-muted-foreground mt-2 text-[0.9375rem]">
             {description}
           </p>
         )}

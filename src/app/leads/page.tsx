@@ -1,17 +1,19 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { noIndex } from "@/lib/seo";
-import { z } from "zod";
 import { apiFetch } from "@/lib/api";
+import { ALL, readPaging } from "@/lib/paging";
 import {
   brokerResponseSchema,
   leadResponseSchema,
   leadStatusSchema,
+  paginatedSchema,
 } from "@/lib/schemas";
 import { DashboardCard } from "@/components/admin/dashboard-card";
 import { AdminShell, EmptyState, PageHeader } from "@/components/admin/shell";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { AssignLeadForm } from "@/components/admin/assign-lead-form";
+import { TablePagination } from "@/components/admin/table-pagination";
 import {
   Table,
   TableBody,
@@ -31,9 +33,11 @@ const FILTERS = ["all", "sent", "unsent", "duplicate", "failed"] as const;
 export default async function LeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; page?: string; perPage?: string }>;
 }) {
-  const { status } = await searchParams;
+  const params = await searchParams;
+  const { status } = params;
+  const { query } = readPaging(params);
 
   // Unknown values fall back to "all" rather than reaching the API.
   const parsed = leadStatusSchema.safeParse(status);
@@ -41,13 +45,13 @@ export default async function LeadsPage({
 
   const [leads, brokers] = await Promise.all([
     apiFetch(
-      active === "all" ? "/leads" : `/leads?status=${active}`,
-      z.array(leadResponseSchema),
+      active === "all" ? `/leads?${query}` : `/leads?status=${active}&${query}`,
+      paginatedSchema(leadResponseSchema),
     ),
-    apiFetch("/brokers", z.array(brokerResponseSchema)),
+    apiFetch(`/brokers?${ALL}`, paginatedSchema(brokerResponseSchema)),
   ]);
 
-  const assignable = brokers.filter((broker) => broker.isActive);
+  const assignable = brokers.data.filter((broker) => broker.isActive);
 
   return (
     <AdminShell>
@@ -74,7 +78,7 @@ export default async function LeadsPage({
         ))}
       </nav>
 
-      {leads.length === 0 ? (
+      {leads.total === 0 ? (
         <EmptyState
           title="No leads to show"
           description={
@@ -101,7 +105,7 @@ export default async function LeadsPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {leads.map((lead) => (
+                {leads.data.map((lead) => (
                   <TableRow key={lead.id}>
                     <TableCell className="font-medium">{lead.name}</TableCell>
                     <TableCell className="text-muted-foreground">
@@ -148,6 +152,13 @@ export default async function LeadsPage({
               </TableBody>
             </Table>
           </div>
+          <TablePagination
+            total={leads.total}
+            page={leads.page}
+            perPage={leads.perPage}
+            totalPages={leads.totalPages}
+            noun="lead"
+          />
         </DashboardCard>
       )}
     </AdminShell>

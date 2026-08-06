@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Client-side mirrors of the API DTOs. Every rule here exists on the server
@@ -18,11 +18,11 @@ const normalizedEmail = z
 
 export const loginSchema = z.object({
   email: normalizedEmail.pipe(
-    z.string().email('Enter a valid email address').max(255),
+    z.string().email("Enter a valid email address").max(255),
   ),
   password: z
     .string()
-    .min(8, 'Password must be at least 8 characters')
+    .min(8, "Password must be at least 8 characters")
     .max(128),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
@@ -37,18 +37,15 @@ export const profileSchema = z
     currentPassword: z.string().max(128),
     newPassword: z.string().max(128),
   })
+  .refine((data) => data.newPassword === "" || data.newPassword.length >= 8, {
+    message: "New password must be at least 8 characters",
+    path: ["newPassword"],
+  })
   .refine(
-    (data) => data.newPassword === '' || data.newPassword.length >= 8,
+    (data) => data.newPassword === "" || data.currentPassword.length > 0,
     {
-      message: 'New password must be at least 8 characters',
-      path: ['newPassword'],
-    },
-  )
-  .refine(
-    (data) => data.newPassword === '' || data.currentPassword.length > 0,
-    {
-      message: 'Enter your current password to change it',
-      path: ['currentPassword'],
+      message: "Enter your current password to change it",
+      path: ["currentPassword"],
     },
   );
 export type ProfileInput = z.infer<typeof profileSchema>;
@@ -62,39 +59,39 @@ export type Me = z.infer<typeof meSchema>;
 
 export const brokerSchema = z
   .object({
-    name: trimmed.pipe(z.string().min(1, 'Name is required').max(255)),
+    name: trimmed.pipe(z.string().min(1, "Name is required").max(255)),
     isActive: z.boolean().default(true),
     dailyCap: z
       .number()
-      .int('Daily cap must be a whole number')
+      .int("Daily cap must be a whole number")
       .min(0)
       .max(100000),
-    timezone: z.string().min(1, 'Timezone is required'),
+    timezone: z.string().min(1, "Timezone is required"),
     openMinute: z.number().int().min(0).max(1440),
     closeMinute: z.number().int().min(0).max(1440),
     workingDays: z
       .array(z.number().int().min(1).max(7))
-      .min(1, 'Select at least one working day')
+      .min(1, "Select at least one working day")
       .max(7),
   })
   .refine((data) => data.openMinute !== data.closeMinute, {
-    message: 'Opening and closing time cannot be the same',
-    path: ['closeMinute'],
+    message: "Opening and closing time cannot be the same",
+    path: ["closeMinute"],
   });
 export type BrokerInput = z.output<typeof brokerSchema>;
 /** What the form holds before defaults are applied — RHF's first generic. */
 export type BrokerFormValues = z.input<typeof brokerSchema>;
 
 export const formSchema = z.object({
-  name: trimmed.pipe(z.string().min(1, 'Form name is required').max(255)),
+  name: trimmed.pipe(z.string().min(1, "Form name is required").max(255)),
   slug: normalizedEmail.pipe(
     z
       .string()
-      .min(1, 'Slug is required')
+      .min(1, "Slug is required")
       .max(255)
       .regex(
         SLUG_PATTERN,
-        'Slug may contain lowercase letters, numbers and hyphens only',
+        "Slug may contain lowercase letters, numbers and hyphens only",
       ),
   ),
 });
@@ -104,8 +101,8 @@ export const distributionBrokerSchema = z.object({
   brokerId: z.number().int(),
   percentage: z
     .number()
-    .min(0, 'Percentage cannot be negative')
-    .max(100, 'Percentage cannot exceed 100'),
+    .min(0, "Percentage cannot be negative")
+    .max(100, "Percentage cannot exceed 100"),
   isActive: z.boolean().default(true),
 });
 
@@ -116,9 +113,9 @@ export type SetBrokersInput = z.output<typeof setBrokersSchema>;
 export type SetBrokersFormValues = z.input<typeof setBrokersSchema>;
 
 export const leadFormSchema = z.object({
-  name: trimmed.pipe(z.string().min(1, 'Name is required').max(255)),
+  name: trimmed.pipe(z.string().min(1, "Name is required").max(255)),
   email: normalizedEmail.pipe(
-    z.string().email('Enter a valid email address').max(255),
+    z.string().email("Enter a valid email address").max(255),
   ),
   phone: trimmed.pipe(z.string().max(32)).optional(),
 });
@@ -129,11 +126,33 @@ export type LeadFormInput = z.infer<typeof leadFormSchema>;
  * unexpected becomes a handled error rather than an undefined render.
  * ---------------------------------------------------------------------- */
 
+/**
+ * Envelope every paginated list endpoint returns. Kept as a factory so each
+ * caller keeps the element type rather than collapsing to unknown.
+ */
+export function paginatedSchema<T extends z.ZodTypeAny>(item: T) {
+  return z.object({
+    data: z.array(item),
+    total: z.number(),
+    page: z.number(),
+    perPage: z.number(),
+    totalPages: z.number(),
+  });
+}
+
+export type Paginated<T> = {
+  data: T[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
+};
+
 export const leadStatusSchema = z.enum([
-  'sent',
-  'unsent',
-  'duplicate',
-  'failed',
+  "sent",
+  "unsent",
+  "duplicate",
+  "failed",
 ]);
 export type LeadStatus = z.infer<typeof leadStatusSchema>;
 

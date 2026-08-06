@@ -1,12 +1,13 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { noIndex } from "@/lib/seo";
-import { z } from "zod";
 import { apiFetch } from "@/lib/api";
-import { brokerResponseSchema } from "@/lib/schemas";
+import { readPaging } from "@/lib/paging";
+import { brokerResponseSchema, paginatedSchema } from "@/lib/schemas";
 import { DashboardCard } from "@/components/admin/dashboard-card";
 import { AdminShell, EmptyState, PageHeader } from "@/components/admin/shell";
 import { BrokerForm } from "@/components/admin/broker-form";
+import { TablePagination } from "@/components/admin/table-pagination";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -21,8 +22,16 @@ import { formatWorkingDays, minutesToTime } from "@/lib/format";
 export const metadata: Metadata = { title: "Brokers", robots: noIndex };
 export const dynamic = "force-dynamic";
 
-export default async function BrokersPage() {
-  const brokers = await apiFetch("/brokers", z.array(brokerResponseSchema));
+export default async function BrokersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; perPage?: string }>;
+}) {
+  const { query } = readPaging(await searchParams);
+  const brokers = await apiFetch(
+    `/brokers?${query}`,
+    paginatedSchema(brokerResponseSchema),
+  );
 
   return (
     <AdminShell>
@@ -33,7 +42,7 @@ export default async function BrokersPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
         <div className="min-w-0">
-          {brokers.length === 0 ? (
+          {brokers.total === 0 ? (
             <EmptyState
               title="No brokers yet"
               description="Add your first broker to start distributing leads."
@@ -53,7 +62,7 @@ export default async function BrokersPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {brokers.map((broker) => (
+                    {brokers.data.map((broker) => (
                       <TableRow key={broker.id}>
                         <TableCell className="font-medium">
                           <Link
@@ -88,6 +97,13 @@ export default async function BrokersPage() {
                   </TableBody>
                 </Table>
               </div>
+              <TablePagination
+                total={brokers.total}
+                page={brokers.page}
+                perPage={brokers.perPage}
+                totalPages={brokers.totalPages}
+                noun="broker"
+              />
             </DashboardCard>
           )}
         </div>

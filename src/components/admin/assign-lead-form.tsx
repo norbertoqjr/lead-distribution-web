@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { http, toMessage } from '@/lib/http';
-import type { Broker } from '@/lib/schemas';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { http, toMessage } from "@/lib/http";
+import type { Broker } from "@/lib/schemas";
+import { Button } from "@/components/ui/button";
 
 /** Inline manual assignment for one unsent lead. */
 export function AssignLeadForm({
@@ -15,7 +15,7 @@ export function AssignLeadForm({
   brokers: Broker[];
 }) {
   const router = useRouter();
-  const [brokerId, setBrokerId] = useState('');
+  const [brokerId, setBrokerId] = useState("");
   const [error, setError] = useState<string>();
   const [submitting, setSubmitting] = useState(false);
 
@@ -28,14 +28,16 @@ export function AssignLeadForm({
     setError(undefined);
 
     if (!brokerId) {
-      setError('Choose a broker');
+      setError("Choose a broker");
       return;
     }
 
     setSubmitting(true);
 
     try {
-      await http.post(`/leads/${leadId}/assign`, { brokerId: Number(brokerId) });
+      await http.post(`/leads/${leadId}/assign`, {
+        brokerId: Number(brokerId),
+      });
       router.refresh();
     } catch (requestError) {
       setError(toMessage(requestError));
@@ -64,7 +66,7 @@ export function AssignLeadForm({
       </select>
 
       <Button type="submit" variant="secondary" size="sm" disabled={submitting}>
-        {submitting ? '…' : 'Assign'}
+        {submitting ? "…" : "Assign"}
       </Button>
 
       {error && (

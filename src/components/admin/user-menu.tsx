@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { ChevronDown, LogOut, UserRound } from 'lucide-react';
-import { http } from '@/lib/http';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ChevronDown, LogOut, UserRound } from "lucide-react";
+import { http } from "@/lib/http";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 
 export function UserMenu({
   name,
@@ -25,19 +25,19 @@ export function UserMenu({
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
 
-  const label = name?.trim() || 'Admin';
+  const label = name?.trim() || "Admin";
   const initials = label.slice(0, 2).toUpperCase();
 
   async function signOut() {
     setSigningOut(true);
 
     try {
-      await http.post('/auth/logout');
+      await http.post("/auth/logout");
     } catch {
       // The cookie is cleared by the proxy on the way back; even if the API
       // call fails, push to login rather than stranding a half-signed-in user.
     } finally {
-      router.push('/login');
+      router.push("/login");
       router.refresh();
     }
   }
@@ -67,7 +67,10 @@ export function UserMenu({
           )}
         </span>
 
-        <ChevronDown className="text-muted-foreground size-4" aria-hidden="true" />
+        <ChevronDown
+          className="text-muted-foreground size-4"
+          aria-hidden="true"
+        />
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-56 rounded-xl">
@@ -99,7 +102,7 @@ export function UserMenu({
           }}
         >
           <LogOut className="size-4" aria-hidden="true" />
-          {signingOut ? 'Signing out…' : 'Sign out'}
+          {signingOut ? "Signing out…" : "Sign out"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

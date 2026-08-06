@@ -1,17 +1,20 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { noIndex } from "@/lib/seo";
-import { z } from "zod";
 import { ApiError, apiFetch } from "@/lib/api";
+import { readPaging } from "@/lib/paging";
 import {
   brokerResponseSchema,
   leadResponseSchema,
+  paginatedSchema,
   type Broker,
+  type Paginated,
   type Lead,
 } from "@/lib/schemas";
 import { DashboardCard } from "@/components/admin/dashboard-card";
 import { AdminShell, EmptyState, PageHeader } from "@/components/admin/shell";
 import { StatusBadge } from "@/components/admin/status-badge";
+import { TablePagination } from "@/components/admin/table-pagination";
 import {
   Table,
   TableBody,
@@ -27,20 +30,26 @@ export const dynamic = "force-dynamic";
 
 export default async function BrokerDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string; perPage?: string }>;
 }) {
   const { id } = await params;
+  const { query } = readPaging(await searchParams);
 
   // Only the fetch sits inside try/catch. JSX built there would not have its
   // render errors caught anyway, and the lint rule is right to flag it.
   let broker: Broker;
-  let leads: Lead[];
+  let leads: Paginated<Lead>;
 
   try {
     [broker, leads] = await Promise.all([
       apiFetch(`/brokers/${id}`, brokerResponseSchema),
-      apiFetch(`/brokers/${id}/leads`, z.array(leadResponseSchema)),
+      apiFetch(
+        `/brokers/${id}/leads?${query}`,
+        paginatedSchema(leadResponseSchema),
+      ),
     ]);
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) notFound();
@@ -58,7 +67,7 @@ export default async function BrokerDetailPage({
         }`}
       />
 
-      {leads.length === 0 ? (
+      {leads.total === 0 ? (
         <EmptyState
           title="No leads yet"
           description="Leads assigned to this broker will appear here."
@@ -79,7 +88,7 @@ export default async function BrokerDetailPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {leads.map((lead) => (
+                {leads.data.map((lead) => (
                   <TableRow key={lead.id}>
                     <TableCell className="font-medium">{lead.name}</TableCell>
                     <TableCell className="text-muted-foreground">
@@ -105,6 +114,13 @@ export default async function BrokerDetailPage({
               </TableBody>
             </Table>
           </div>
+          <TablePagination
+            total={leads.total}
+            page={leads.page}
+            perPage={leads.perPage}
+            totalPages={leads.totalPages}
+            noun="lead"
+          />
         </DashboardCard>
       )}
     </AdminShell>

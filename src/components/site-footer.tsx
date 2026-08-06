@@ -1,9 +1,9 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 const links = [
-  { href: '/privacy', label: 'Privacy' },
-  { href: '/terms', label: 'Terms' },
-  { href: '/health', label: 'System health' },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/terms", label: "Terms" },
+  { href: "/health", label: "System health" },
 ];
 
 /**

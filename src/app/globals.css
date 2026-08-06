@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 /*
  * Theme tokens. Single source of truth is docs/dashboard-design.json — values
@@ -124,7 +124,13 @@
   body {
     @apply bg-background text-foreground;
     font-family:
-      Inter, Geist, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+      Inter,
+      Geist,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      Roboto,
       sans-serif;
     font-size: 0.9375rem;
     line-height: 1.5;
@@ -148,28 +154,28 @@
    * control would otherwise feel inert on hover.
    */
   button:not(:disabled),
-  [role='button']:not([aria-disabled='true']),
+  [role="button"]:not([aria-disabled="true"]),
   a[href],
   label[for],
   select:not(:disabled),
   summary,
-  [type='checkbox']:not(:disabled),
-  [type='radio']:not(:disabled),
-  [type='submit']:not(:disabled) {
+  [type="checkbox"]:not(:disabled),
+  [type="radio"]:not(:disabled),
+  [type="submit"]:not(:disabled) {
     cursor: pointer;
   }
 
   button:disabled,
   select:disabled,
   input:disabled,
-  [aria-disabled='true'] {
+  [aria-disabled="true"] {
     cursor: not-allowed;
   }
 
   /* buttonActiveScale from the motion block. */
   @media (prefers-reduced-motion: no-preference) {
     button:not(:disabled):active,
-    [type='submit']:not(:disabled):active {
+    [type="submit"]:not(:disabled):active {
       transform: scale(0.98);
     }
   }

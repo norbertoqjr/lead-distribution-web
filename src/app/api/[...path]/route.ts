@@ -1,5 +1,5 @@
-import { NextResponse, type NextRequest } from 'next/server';
-import { readSessionCookie } from '@/lib/session-cookie';
+import { NextResponse, type NextRequest } from "next/server";
+import { readSessionCookie } from "@/lib/session-cookie";
 
 /**
  * Same-origin proxy to the backend.
@@ -13,10 +13,10 @@ import { readSessionCookie } from '@/lib/session-cookie';
  * only carries the cookie the browser already holds.
  */
 
-const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? 'lds_session';
+const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? "lds_session";
 
 /** Methods a browser may proxy. Anything else is rejected outright. */
-const ALLOWED = new Set(['GET', 'POST', 'PATCH', 'PUT', 'DELETE']);
+const ALLOWED = new Set(["GET", "POST", "PATCH", "PUT", "DELETE"]);
 
 async function forward(
   request: NextRequest,
@@ -26,13 +26,16 @@ async function forward(
 
   if (!backend) {
     return NextResponse.json(
-      { message: 'BACKEND_URL is not configured' },
+      { message: "BACKEND_URL is not configured" },
       { status: 500 },
     );
   }
 
   if (!ALLOWED.has(request.method)) {
-    return NextResponse.json({ message: 'Method not allowed' }, { status: 405 });
+    return NextResponse.json(
+      { message: "Method not allowed" },
+      { status: 405 },
+    );
   }
 
   const { path } = await context.params;
@@ -40,14 +43,14 @@ async function forward(
   // Rebuild the path from the matched segments rather than the raw URL, so a
   // crafted "../" cannot walk out of /api on the backend.
   const target = new URL(
-    `/api/${path.map(encodeURIComponent).join('/')}`,
+    `/api/${path.map(encodeURIComponent).join("/")}`,
     backend,
   );
   target.search = request.nextUrl.search;
 
   const token = request.cookies.get(SESSION_COOKIE)?.value;
   const body =
-    request.method === 'GET' || request.method === 'DELETE'
+    request.method === "GET" || request.method === "DELETE"
       ? undefined
       : await request.text();
 
@@ -57,15 +60,15 @@ async function forward(
     response = await fetch(target, {
       method: request.method,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...(token ? { Cookie: `${SESSION_COOKIE}=${token}` } : {}),
       },
       body,
-      cache: 'no-store',
+      cache: "no-store",
     });
   } catch {
     return NextResponse.json(
-      { message: 'Cannot reach the API. Is the backend running?' },
+      { message: "Cannot reach the API. Is the backend running?" },
       { status: 502 },
     );
   }
@@ -73,7 +76,7 @@ async function forward(
   const text = await response.text();
   const proxied = new NextResponse(text || null, {
     status: response.status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { "Content-Type": "application/json" },
   });
 
   // Login and logout both answer with Set-Cookie; mirror it onto this origin
@@ -81,25 +84,25 @@ async function forward(
   // backend's address. The decision is a pure function so it can be tested
   // without standing up both servers.
   const action = readSessionCookie(
-    response.headers.get('set-cookie'),
+    response.headers.get("set-cookie"),
     SESSION_COOKIE,
   );
 
-  if (action.type === 'set') {
+  if (action.type === "set") {
     proxied.cookies.set(SESSION_COOKIE, action.value, {
       httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60,
-      path: '/',
+      path: "/",
     });
-  } else if (action.type === 'clear') {
-    proxied.cookies.set(SESSION_COOKIE, '', {
+  } else if (action.type === "clear") {
+    proxied.cookies.set(SESSION_COOKIE, "", {
       httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
       maxAge: 0,
-      path: '/',
+      path: "/",
     });
   }
 

@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Controller, useForm, useWatch } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { http, toMessage } from '@/lib/http';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { http, toMessage } from "@/lib/http";
 import {
   setBrokersSchema,
   type Broker,
   type Distribution,
   type SetBrokersFormValues,
   type SetBrokersInput,
-} from '@/lib/schemas';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FieldError, FormError } from './field-error';
+} from "@/lib/schemas";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FieldError, FormError } from "./field-error";
 
 /** Shown before a distribution exists. */
 export function CreateDistribution({ brokers }: { brokers: Broker[] }) {
@@ -31,7 +31,7 @@ export function CreateDistribution({ brokers }: { brokers: Broker[] }) {
     setSubmitting(true);
 
     try {
-      await http.post('/distributions', { brokerIds: selected });
+      await http.post("/distributions", { brokerIds: selected });
       router.refresh();
     } catch (error) {
       // Carries the API's exact message when no form exists yet.
@@ -81,7 +81,7 @@ export function CreateDistribution({ brokers }: { brokers: Broker[] }) {
           )}
 
           <Button type="submit" disabled={submitting}>
-            {submitting ? 'Creating…' : 'Create distribution'}
+            {submitting ? "Creating…" : "Create distribution"}
           </Button>
         </form>
       </CardContent>
@@ -106,7 +106,7 @@ export function DistributionBrokers({
     formState: { errors, isSubmitting },
   } = useForm<SetBrokersFormValues, unknown, SetBrokersInput>({
     resolver: zodResolver(setBrokersSchema),
-    mode: 'onBlur',
+    mode: "onBlur",
     defaultValues: {
       brokers: brokers.map((broker) => {
         const member = distribution.brokers.find(
@@ -124,7 +124,7 @@ export function DistributionBrokers({
 
   // useWatch rather than watch(): the latter cannot be memoized safely and
   // re-renders the whole form on every keystroke.
-  const values = useWatch({ control, name: 'brokers' });
+  const values = useWatch({ control, name: "brokers" });
   const total = values
     .filter((entry) => entry.isActive)
     .reduce((sum, entry) => sum + (Number(entry.percentage) || 0), 0);
@@ -217,13 +217,13 @@ export function DistributionBrokers({
                 // A warning, not a block: the algorithm still works, shares are
                 // simply relative rather than absolute.
                 <span className="text-warning">
-                  {' '}
+                  {" "}
                   · shares are treated as relative weights unless this is 100
                 </span>
               )}
             </p>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving…' : 'Save shares'}
+              {isSubmitting ? "Saving…" : "Save shares"}
             </Button>
           </div>
         </form>

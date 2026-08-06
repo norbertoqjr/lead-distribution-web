@@ -1,6 +1,6 @@
-import Link from 'next/link';
-import { ArrowUpRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 /**
  * Metric tile. Per statCard in docs/dashboard-design.json: title above, large
@@ -28,15 +28,15 @@ export function StatCard({
     <Link
       href={href}
       className={cn(
-        'card-interactive group flex min-h-42 flex-col justify-between rounded-3xl border p-5',
+        "card-interactive group flex min-h-42 flex-col justify-between rounded-3xl border p-5",
         featured
-          ? 'border-transparent bg-[linear-gradient(145deg,#135D3C_0%,#1D7A4E_58%,#258657_100%)] text-white'
-          : 'bg-card border-border/60',
+          ? "border-transparent bg-[linear-gradient(145deg,#135D3C_0%,#1D7A4E_58%,#258657_100%)] text-white"
+          : "bg-card border-border/60",
         // Only unsent leads need the admin to act, so only that tile is marked.
-        !featured && alert && 'border-warning/60',
+        !featured && alert && "border-warning/60",
       )}
     >
-      <p className={cn('font-medium', featured ? 'text-white' : undefined)}>
+      <p className={cn("font-medium", featured ? "text-white" : undefined)}>
         {label}
       </p>
 
@@ -48,8 +48,8 @@ export function StatCard({
           {meta && (
             <p
               className={cn(
-                'mt-2 text-xs',
-                featured ? 'text-[#BFE58B]' : 'text-[#6D8979]',
+                "mt-2 text-xs",
+                featured ? "text-[#BFE58B]" : "text-[#6D8979]",
               )}
             >
               {meta}
@@ -60,10 +60,10 @@ export function StatCard({
         <span
           aria-hidden="true"
           className={cn(
-            'grid size-10 shrink-0 place-items-center rounded-full border',
+            "grid size-10 shrink-0 place-items-center rounded-full border",
             featured
-              ? 'text-foreground border-transparent bg-white'
-              : 'border-[#2A342F]',
+              ? "text-foreground border-transparent bg-white"
+              : "border-[#2A342F]",
           )}
         >
           <ArrowUpRight className="size-4.5" />

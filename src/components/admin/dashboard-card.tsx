@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 /**
  * Standard content panel: title, optional action, body. Wraps shadcn Card so
@@ -19,14 +19,14 @@ export function DashboardCard({
   bodyClassName?: string;
 }) {
   return (
-    <Card className={cn('overflow-hidden', className)}>
+    <Card className={cn("overflow-hidden", className)}>
       {title && (
         <CardHeader className="flex flex-row items-center justify-between gap-4">
           <CardTitle className="text-base font-semibold">{title}</CardTitle>
           {action}
         </CardHeader>
       )}
-      <CardContent className={cn(title ? 'pt-0' : 'pt-0', bodyClassName)}>
+      <CardContent className={cn(title ? "pt-0" : "pt-0", bodyClassName)}>
         {children}
       </CardContent>
     </Card>

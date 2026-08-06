@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { Menu, Route } from 'lucide-react';
+import { useState } from "react";
+import Link from "next/link";
+import { Menu, Route } from "lucide-react";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
-import { SidebarNav } from './sidebar-nav';
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { SidebarNav } from "./sidebar-nav";
 
 /**
  * Mobile sidebar. The design puts navigation in a Sheet below 768px rather
