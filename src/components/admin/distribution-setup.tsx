@@ -133,7 +133,7 @@ export function DistributionBrokers({
               {total !== 100 && (
                 // A warning, not a block: the algorithm still works, shares are
                 // simply relative rather than absolute.
-                <span className="text-[color:var(--warning)]">
+                <span className="text-warning">
                   {' '}
                   · shares are treated as relative weights unless this is 100
                 </span>

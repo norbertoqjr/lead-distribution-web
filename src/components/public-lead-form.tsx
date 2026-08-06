@@ -18,10 +18,10 @@ export function PublicLeadForm({ slug }: { slug: string }) {
     return (
       <div
         role="status"
-        className="border-[color:var(--success)]/40 bg-[color:var(--success)]/10 rounded-lg border p-6 text-center"
+        className="border-success/40 bg-success/10 rounded-lg border p-6 text-center"
       >
         <CheckCircle2
-          className="mx-auto mb-2 size-6 text-[color:var(--success)]"
+          className="mx-auto mb-2 size-6 text-success"
           aria-hidden="true"
         />
         <p className="font-medium">Thank you — we have your details.</p>

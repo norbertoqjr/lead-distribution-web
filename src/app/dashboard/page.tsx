@@ -94,8 +94,8 @@ export default async function DashboardPage() {
                   <span
                     className={
                       step.done
-                        ? 'text-[color:var(--success)] text-xs font-semibold'
-                        : 'text-[color:var(--warning)] text-xs font-semibold'
+                        ? 'text-success text-xs font-semibold'
+                        : 'text-warning text-xs font-semibold'
                     }
                   >
                     {step.done ? 'Ready' : 'Pending'}

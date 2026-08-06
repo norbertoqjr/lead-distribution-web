@@ -1,5 +1,10 @@
+import Link from 'next/link';
 import type { Metadata } from 'next';
+import { ArrowLeft } from 'lucide-react';
 import { getApiHealth } from '@/lib/api';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 export const metadata: Metadata = {
   title: 'Health',
@@ -12,13 +17,42 @@ export const dynamic = 'force-dynamic';
 
 type Tone = 'ok' | 'warn' | 'danger';
 
-function Badge({ tone, children }: { tone: Tone; children: string }) {
+const tones: Record<Tone, string> = {
+  ok: 'bg-success/15 text-success',
+  warn: 'bg-warning/15 text-warning',
+  danger: 'bg-destructive/15 text-destructive',
+};
+
+function StatusBadge({ tone, children }: { tone: Tone; children: string }) {
   return (
-    <span className={`badge badge--${tone}`}>
-      {/* Dot is decorative; the text beside it carries the meaning. */}
-      <span className="badge__dot" aria-hidden="true" />
+    <Badge variant="outline" className={`border-transparent ${tones[tone]}`}>
+      {/* The dot is decorative; the text beside it carries the meaning. */}
+      <span
+        className="mr-1.5 size-1.5 rounded-full bg-current"
+        aria-hidden="true"
+      />
       {children}
-    </span>
+    </Badge>
+  );
+}
+
+function Row({
+  term,
+  hint,
+  children,
+}: {
+  term: string;
+  hint: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 px-6 py-4 not-first:border-t">
+      <div>
+        <dt className="font-medium">{term}</dt>
+        <dd className="text-muted-foreground text-sm">{hint}</dd>
+      </div>
+      <dd>{children}</dd>
+    </div>
   );
 }
 
@@ -29,78 +63,86 @@ export default async function HealthPage() {
   const databaseUp = health?.database === 'up';
 
   return (
-    <section className="section">
-      <div className="container">
-        <h1>System health</h1>
-        <p className="hero__lede" style={{ marginTop: 'var(--space-2)' }}>
-          Live check of the frontend’s connection to the API and the API’s
-          connection to MySQL.
-        </p>
+    <main id="main" className="mx-auto max-w-2xl px-6 py-12">
+      <Button asChild variant="ghost" size="sm" className="mb-6 -ml-3">
+        <Link href="/">
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          Back
+        </Link>
+      </Button>
 
-        <dl className="status-list">
-          <div className="status-row">
-            <div className="status-row__label">
-              <dt className="status-row__term">Web</dt>
-              <dd className="status-row__hint">This Next.js application</dd>
-            </div>
-            <dd className="status-row__value">
-              <Badge tone="ok">Running</Badge>
-            </dd>
-          </div>
+      <h1 className="text-2xl font-semibold tracking-tight">System health</h1>
+      <p className="text-muted-foreground mt-1 mb-6 text-sm">
+        Live check of the frontend’s connection to the API, and the API’s
+        connection to MySQL.
+      </p>
 
-          <div className="status-row">
-            <div className="status-row__label">
-              <dt className="status-row__term">API</dt>
-              <dd className="status-row__hint">
-                NestJS service on the private port
-              </dd>
-            </div>
-            <dd className="status-row__value">
-              {reachable ? (
-                <Badge tone={health.status === 'ok' ? 'ok' : 'warn'}>
-                  {health.status === 'ok' ? 'Reachable' : 'Degraded'}
-                </Badge>
-              ) : (
-                <Badge tone="danger">Unreachable</Badge>
-              )}
-            </dd>
-          </div>
+      <dl className="bg-card overflow-hidden rounded-lg border">
+        <Row term="Web" hint="This Next.js application">
+          <StatusBadge tone="ok">Running</StatusBadge>
+        </Row>
 
-          <div className="status-row">
-            <div className="status-row__label">
-              <dt className="status-row__term">Database</dt>
-              <dd className="status-row__hint">MySQL via TypeORM</dd>
-            </div>
-            <dd className="status-row__value">
-              {!reachable ? (
-                <Badge tone="warn">Unknown</Badge>
-              ) : databaseUp ? (
-                <Badge tone="ok">Connected</Badge>
-              ) : (
-                <Badge tone="danger">Disconnected</Badge>
-              )}
-            </dd>
-          </div>
-        </dl>
+        <Row term="API" hint="NestJS service on the private port">
+          {reachable ? (
+            <StatusBadge tone={health.status === 'ok' ? 'ok' : 'warn'}>
+              {health.status === 'ok' ? 'Reachable' : 'Degraded'}
+            </StatusBadge>
+          ) : (
+            <StatusBadge tone="danger">Unreachable</StatusBadge>
+          )}
+        </Row>
 
-        {!reachable && (
-          <p className="note" style={{ marginTop: 'var(--space-6)' }}>
-            The API did not respond. Start it with <span className="mono">npm
-            run dev</span> from the project root, and confirm{' '}
-            <span className="mono">BACKEND_URL</span> in{' '}
-            <span className="mono">web/.env.local</span> points at the API port.
-          </p>
-        )}
+        <Row term="Database" hint="MySQL via TypeORM">
+          {!reachable ? (
+            <StatusBadge tone="warn">Unknown</StatusBadge>
+          ) : databaseUp ? (
+            <StatusBadge tone="ok">Connected</StatusBadge>
+          ) : (
+            <StatusBadge tone="danger">Disconnected</StatusBadge>
+          )}
+        </Row>
+      </dl>
 
-        {reachable && !databaseUp && (
-          <p className="note" style={{ marginTop: 'var(--space-6)' }}>
+      {/* Say what to actually do, not just that something is wrong. */}
+      {!reachable && (
+        <Card className="border-l-warning mt-6 border-l-2">
+          <CardContent className="text-muted-foreground pt-6 text-sm">
+            The API did not respond. Start it with{' '}
+            <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">
+              npm run dev
+            </code>{' '}
+            from the project root, and confirm{' '}
+            <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">
+              BACKEND_URL
+            </code>{' '}
+            in{' '}
+            <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">
+              web/.env.local
+            </code>{' '}
+            points at the API port.
+          </CardContent>
+        </Card>
+      )}
+
+      {reachable && !databaseUp && (
+        <Card className="border-l-warning mt-6 border-l-2">
+          <CardContent className="text-muted-foreground pt-6 text-sm">
             The API is running but cannot reach MySQL. Start the database with{' '}
-            <span className="mono">npm run db:up</span> and check{' '}
-            <span className="mono">DATABASE_URL</span> in{' '}
-            <span className="mono">api/.env</span>.
-          </p>
-        )}
-      </div>
-    </section>
+            <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">
+              npm run db:up
+            </code>{' '}
+            and check{' '}
+            <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">
+              DATABASE_URL
+            </code>{' '}
+            in{' '}
+            <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">
+              api/.env
+            </code>
+            .
+          </CardContent>
+        </Card>
+      )}
+    </main>
   );
 }

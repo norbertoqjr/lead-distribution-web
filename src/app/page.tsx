@@ -1,30 +1,33 @@
 import Link from 'next/link';
 import {
-  ActivityIcon,
-  ArrowRightIcon,
-  ClockIcon,
-  ShieldIcon,
-  UsersIcon,
-} from '@/components/icons';
+  Activity,
+  ArrowRight,
+  Clock,
+  Route,
+  ShieldCheck,
+  Users,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 const capabilities = [
   {
-    icon: <UsersIcon />,
+    icon: Users,
     title: 'Fair broker share',
     body: 'Each broker gets a target percentage. The next lead goes to whoever is furthest behind their share.',
   },
   {
-    icon: <ClockIcon />,
+    icon: Clock,
     title: 'Timezone aware',
     body: 'Opening hours, working days, and daily caps are evaluated in the broker’s own timezone, not the server’s.',
   },
   {
-    icon: <ShieldIcon />,
+    icon: ShieldCheck,
     title: 'No duplicate leads',
     body: 'Emails are normalized on submission. An address already sent to a broker is never routed to a second one.',
   },
   {
-    icon: <ActivityIcon />,
+    icon: Activity,
     title: 'Full audit trail',
     body: 'Every lead is recorded with its captured IP address and status: sent, unsent, duplicate, or failed.',
   },
@@ -33,50 +36,90 @@ const capabilities = [
 export default function HomePage() {
   return (
     <>
-      <section className="hero">
-        <div className="container">
-          <p className="eyebrow">Admin platform</p>
+      <header className="bg-card border-b">
+        <div className="mx-auto flex min-h-15 max-w-5xl items-center justify-between gap-4 px-6">
+          <span className="flex items-center gap-2 font-semibold">
+            <span className="bg-accent text-accent-foreground grid size-7 place-items-center rounded-md">
+              <Route className="size-4" aria-hidden="true" />
+            </span>
+            Lead Distribution
+          </span>
 
-          <h1>Route every lead to the right broker.</h1>
-
-          <p className="hero__lede">
-            One public form, one distribution, many brokers. Leads are captured
-            with their IP address, checked for duplicates, and assigned by
-            percentage share within each broker’s working hours and daily cap.
-          </p>
-
-          <div className="actions">
-            <Link className="btn btn--primary" href="/health">
-              View system health
-              <ArrowRightIcon />
-            </Link>
-            <a
-              className="btn btn--secondary"
-              href="https://github.com/norbertoqjr/lead-distribution-platform"
-              target="_blank"
-              rel="noreferrer noopener"
-            >
-              Documentation
-            </a>
-          </div>
+          <nav aria-label="Main" className="flex items-center gap-1">
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/health">Health</Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link href="/login">Sign in</Link>
+            </Button>
+          </nav>
         </div>
-      </section>
+      </header>
 
-      <section className="section">
-        <div className="container">
-          <h2 className="section__title">How distribution works</h2>
+      <main id="main">
+        <section className="border-b">
+          <div className="mx-auto max-w-5xl px-6 py-16 sm:py-24">
+            <p className="text-muted-foreground bg-muted mb-6 inline-flex rounded-full border px-3 py-1 text-xs font-medium">
+              Admin platform
+            </p>
 
-          <div className="grid">
+            <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-5xl">
+              Route every lead to the right broker.
+            </h1>
+
+            {/* max-w keeps the measure near 65 characters on wide screens */}
+            <p className="text-muted-foreground mt-4 max-w-2xl text-lg text-pretty">
+              One public form, one distribution, many brokers. Leads are
+              captured with their IP address, checked for duplicates, and
+              assigned by percentage share within each broker’s working hours
+              and daily cap.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button asChild size="lg">
+                <Link href="/login">
+                  Sign in to the admin
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/health">System health</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-5xl px-6 py-12">
+          <h2 className="text-muted-foreground mb-6 text-xs font-semibold tracking-wider uppercase">
+            How distribution works
+          </h2>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {capabilities.map((item) => (
-              <article className="card" key={item.title}>
-                <span className="card__icon">{item.icon}</span>
-                <h3>{item.title}</h3>
-                <p>{item.body}</p>
-              </article>
+              <Card key={item.title}>
+                <CardContent className="pt-6">
+                  <span className="bg-accent text-accent-foreground mb-4 grid size-9 place-items-center rounded-md">
+                    <item.icon className="size-5" aria-hidden="true" />
+                  </span>
+                  <h3 className="font-medium">{item.title}</h3>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    {item.body}
+                  </p>
+                </CardContent>
+              </Card>
             ))}
           </div>
+        </section>
+      </main>
+
+      <footer className="text-muted-foreground border-t">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-6 text-sm">
+          <span>Lead Distribution Platform</span>
+          <Link href="/health" className="hover:underline">
+            System health
+          </Link>
         </div>
-      </section>
+      </footer>
     </>
   );
 }
