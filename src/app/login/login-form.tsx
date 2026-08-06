@@ -56,11 +56,19 @@ export function LoginForm({ next }: { next?: string }) {
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-6 py-12">
+      {/* The wordmark is where people look for the way back out. */}
+      <Link
+        href="/"
+        className="text-foreground flex items-center gap-2 font-semibold hover:no-underline"
+      >
+        <span className="bg-accent text-accent-foreground grid size-8 place-items-center rounded-md">
+          <Route className="size-4.5" aria-hidden="true" />
+        </span>
+        Lead Distribution
+      </Link>
+
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <div className="bg-accent text-accent-foreground mb-2 grid size-9 place-items-center rounded-md">
-            <Route className="size-5" aria-hidden="true" />
-          </div>
           <CardTitle>Sign in</CardTitle>
           <CardDescription>
             Admin access to the lead distribution platform.
@@ -105,7 +113,9 @@ export function LoginForm({ next }: { next?: string }) {
         </CardContent>
       </Card>
 
-      {/* Signing in should never be a dead end. */}
+      {/* Second way out, for anyone who reads bottom-up. Same destination as
+          the wordmark, so the label stays identical rather than inventing a
+          competing phrase for the same action. */}
       <Link
         href="/"
         className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm"
