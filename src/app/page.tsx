@@ -1,62 +1,44 @@
-import Link from 'next/link';
-import {
-  Activity,
-  ArrowRight,
-  Clock,
-  Route,
-  ShieldCheck,
-  Users,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { Activity, ArrowRight, Clock, ShieldCheck, Users } from "lucide-react";
+import { SiteHeader } from "@/components/site-header";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+
+const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? "lds_session";
 
 /** The lead one gets the wide cell; the rest sit beneath it. */
 const lead = {
   icon: Users,
-  title: 'Fair broker share',
-  body: 'Each broker gets a target percentage. The next lead goes to whoever is furthest behind their share, so the split holds over time rather than only on average.',
+  title: "Fair broker share",
+  body: "Each broker gets a target percentage. The next lead goes to whoever is furthest behind their share, so the split holds over time rather than only on average.",
 };
 
 const capabilities = [
   {
     icon: Clock,
-    title: 'Timezone aware',
-    body: 'Opening hours, working days, and daily caps are evaluated in the broker’s own timezone, not the server’s.',
+    title: "Timezone aware",
+    body: "Opening hours, working days, and daily caps are evaluated in the broker’s own timezone, not the server’s.",
   },
   {
     icon: ShieldCheck,
-    title: 'No duplicate leads',
-    body: 'Emails are normalized on submission. An address already sent to a broker is never routed to a second one.',
+    title: "No duplicate leads",
+    body: "Emails are normalized on submission. An address already sent to a broker is never routed to a second one.",
   },
   {
     icon: Activity,
-    title: 'Full audit trail',
-    body: 'Every lead is recorded with its captured IP address and status.',
+    title: "Full audit trail",
+    body: "Every lead is recorded with its captured IP address and status.",
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const store = await cookies();
+  const signedIn = Boolean(store.get(SESSION_COOKIE)?.value);
+
   return (
     <>
-      <header className="bg-card border-b">
-        <div className="mx-auto flex min-h-15 max-w-5xl items-center justify-between gap-4 px-6">
-          <span className="flex items-center gap-2 font-semibold">
-            <span className="bg-accent text-accent-foreground grid size-7 place-items-center rounded-md">
-              <Route className="size-4" aria-hidden="true" />
-            </span>
-            Lead Distribution
-          </span>
-
-          <nav aria-label="Main" className="flex items-center gap-1">
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/health">Health</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link href="/login">Sign in</Link>
-            </Button>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main id="main">
         <section className="border-b">
@@ -79,8 +61,8 @@ export default function HomePage() {
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <Link href="/login">
-                  Sign in to the admin
+                <Link href={signedIn ? "/dashboard" : "/login"}>
+                  {signedIn ? "Go to dashboard" : "Sign in to the admin"}
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
               </Button>

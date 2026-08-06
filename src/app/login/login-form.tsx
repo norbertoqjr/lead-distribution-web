@@ -1,27 +1,27 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Route } from 'lucide-react';
-import { http, toMessage } from '@/lib/http';
-import { loginSchema, type LoginInput } from '@/lib/schemas';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft, Route } from "lucide-react";
+import { http, toMessage } from "@/lib/http";
+import { loginSchema, type LoginInput } from "@/lib/schemas";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { FieldError, FormError } from '@/components/admin/field-error';
+} from "@/components/ui/card";
+import { FieldError, FormError } from "@/components/admin/field-error";
 
-export function LoginForm() {
+export function LoginForm({ next }: { next?: string }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [formError, setFormError] = useState<string>();
 
   const {
@@ -32,18 +32,22 @@ export function LoginForm() {
     resolver: zodResolver(loginSchema),
     // Validate on blur, not on every keystroke — an error appearing while the
     // user is still typing their email reads as the form fighting them.
-    mode: 'onBlur',
+    mode: "onBlur",
   });
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(undefined);
 
     try {
-      await http.post('/auth/login', values);
+      await http.post("/auth/login", values);
 
       // The destination the middleware preserved when it redirected here.
-      const next = searchParams.get('next');
-      router.push(next?.startsWith('/') ? next : '/dashboard');
+      // Same-origin paths only: a protocol-relative value like //evil.example
+      // also starts with "/", and would redirect an admin off-site the moment
+      // they signed in.
+      const safeNext =
+        next?.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+      router.push(safeNext);
       router.refresh();
     } catch (error) {
       setFormError(toMessage(error));
@@ -51,7 +55,7 @@ export function LoginForm() {
   });
 
   return (
-    <div className="flex min-h-dvh items-center justify-center px-6 py-12">
+    <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-6 py-12">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <div className="bg-accent text-accent-foreground mb-2 grid size-9 place-items-center rounded-md">
@@ -75,7 +79,7 @@ export function LoginForm() {
                 autoComplete="username"
                 aria-invalid={Boolean(errors.email)}
                 className="mt-1.5"
-                {...register('email')}
+                {...register("email")}
               />
               <FieldError message={errors.email?.message} />
             </div>
@@ -88,18 +92,27 @@ export function LoginForm() {
                 autoComplete="current-password"
                 aria-invalid={Boolean(errors.password)}
                 className="mt-1.5"
-                {...register('password')}
+                {...register("password")}
               />
               <FieldError message={errors.password?.message} />
             </div>
 
             {/* Disabled while submitting so a double click cannot fire twice */}
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Signing in…' : 'Sign in'}
+              {isSubmitting ? "Signing in…" : "Sign in"}
             </Button>
           </form>
         </CardContent>
       </Card>
+
+      {/* Signing in should never be a dead end. */}
+      <Link
+        href="/"
+        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm"
+      >
+        <ArrowLeft className="size-4" aria-hidden="true" />
+        Back to home
+      </Link>
     </div>
   );
 }
