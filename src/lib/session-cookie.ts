@@ -1,7 +1,5 @@
 export type CookieAction =
-  | { type: 'none' }
-  | { type: 'set'; value: string }
-  | { type: 'clear' };
+  { type: "none" } | { type: "set"; value: string } | { type: "clear" };
 
 /**
  * Decides what the proxy should do with the browser's session cookie, given
@@ -17,16 +15,16 @@ export function readSessionCookie(
   cookieName: string,
 ): CookieAction {
   if (!setCookie || !setCookie.includes(`${cookieName}=`)) {
-    return { type: 'none' };
+    return { type: "none" };
   }
 
-  const value = new RegExp(`${cookieName}=([^;]*)`).exec(setCookie)?.[1] ?? '';
+  const value = new RegExp(`${cookieName}=([^;]*)`).exec(setCookie)?.[1] ?? "";
 
   const expired =
     /max-age=\s*0/i.test(setCookie) ||
     /expires=\s*thu,\s*01 jan 1970/i.test(setCookie);
 
-  if (value === '' || expired) return { type: 'clear' };
+  if (value === "" || expired) return { type: "clear" };
 
-  return { type: 'set', value };
+  return { type: "set", value };
 }

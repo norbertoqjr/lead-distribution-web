@@ -1,10 +1,10 @@
-import axios, { AxiosError } from 'axios';
-import { cookies } from 'next/headers';
-import { z } from 'zod';
+import axios, { AxiosError } from "axios";
+import { cookies } from "next/headers";
+import { z } from "zod";
 
 export type Health = { status: string; database: string };
 
-const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? 'lds_session';
+const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? "lds_session";
 
 export class ApiError extends Error {
   constructor(
@@ -12,7 +12,7 @@ export class ApiError extends Error {
     readonly status: number,
   ) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 }
 
@@ -25,13 +25,13 @@ function messageFrom(error: AxiosError): string {
 
   if (parsed.success) {
     return Array.isArray(parsed.data.message)
-      ? parsed.data.message.join('. ')
+      ? parsed.data.message.join(". ")
       : parsed.data.message;
   }
 
   return error.response?.status === 401
-    ? 'Your session has expired. Sign in again.'
-    : 'Something went wrong. Please try again.';
+    ? "Your session has expired. Sign in again."
+    : "Something went wrong. Please try again.";
 }
 
 /**
@@ -47,7 +47,7 @@ export async function apiFetch<T>(
   config: { method?: string; data?: unknown } = {},
 ): Promise<T> {
   const baseUrl = process.env.BACKEND_URL;
-  if (!baseUrl) throw new ApiError('BACKEND_URL is not configured', 500);
+  if (!baseUrl) throw new ApiError("BACKEND_URL is not configured", 500);
 
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;
@@ -55,10 +55,10 @@ export async function apiFetch<T>(
   try {
     const response = await axios.request<unknown>({
       url: `${baseUrl}/api${path}`,
-      method: config.method ?? 'GET',
+      method: config.method ?? "GET",
       data: config.data,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...(token ? { Cookie: `${SESSION_COOKIE}=${token}` } : {}),
       },
       timeout: 15000,
@@ -69,7 +69,7 @@ export async function apiFetch<T>(
     if (!parsed.success) {
       // An unexpected shape is a handled error, not a crash halfway through
       // rendering the page.
-      throw new ApiError('The API returned an unexpected response', 502);
+      throw new ApiError("The API returned an unexpected response", 502);
     }
 
     return parsed.data;
@@ -80,7 +80,7 @@ export async function apiFetch<T>(
       throw new ApiError(messageFrom(error), error.response?.status ?? 502);
     }
 
-    throw new ApiError('Something went wrong. Please try again.', 502);
+    throw new ApiError("Something went wrong. Please try again.", 502);
   }
 }
 

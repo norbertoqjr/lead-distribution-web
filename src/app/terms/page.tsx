@@ -1,11 +1,11 @@
-import type { Metadata } from 'next';
-import { LegalPage } from '@/components/legal-page';
+import type { Metadata } from "next";
+import { LegalPage } from "@/components/legal-page";
 
 export const metadata: Metadata = {
-  title: 'Terms and Conditions',
+  title: "Terms and Conditions",
   description:
-    'The terms governing use of the Lead Distribution Platform, for both people submitting enquiries and administrators managing distribution.',
-  alternates: { canonical: '/terms' },
+    "The terms governing use of the Lead Distribution Platform, for both people submitting enquiries and administrators managing distribution.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

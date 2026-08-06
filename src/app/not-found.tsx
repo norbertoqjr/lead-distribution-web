@@ -1,13 +1,13 @@
-import Link from 'next/link';
-import type { Metadata } from 'next';
-import { ArrowRight, FileQuestion } from 'lucide-react';
-import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
-import { Button } from '@/components/ui/button';
-import { noIndex } from '@/lib/seo';
+import Link from "next/link";
+import type { Metadata } from "next";
+import { ArrowRight, FileQuestion } from "lucide-react";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
+import { Button } from "@/components/ui/button";
+import { noIndex } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: 'Page not found',
+  title: "Page not found",
   robots: noIndex,
 };
 
@@ -38,7 +38,7 @@ export default function NotFound() {
         <p className="text-muted-foreground mt-3 text-[0.9375rem]">
           The link may be out of date, or the address may have a typo. If you
           were opening a lead form, check the URL with whoever shared it: form
-          addresses are case sensitive and use hyphens, like{' '}
+          addresses are case sensitive and use hyphens, like{" "}
           <span className="text-foreground font-mono text-sm">
             /lead-registration
           </span>

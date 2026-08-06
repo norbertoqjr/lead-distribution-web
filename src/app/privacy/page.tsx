@@ -1,11 +1,11 @@
-import type { Metadata } from 'next';
-import { LegalPage } from '@/components/legal-page';
+import type { Metadata } from "next";
+import { LegalPage } from "@/components/legal-page";
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy',
+  title: "Privacy Policy",
   description:
-    'What personal data the Lead Distribution Platform collects, why it is collected, who it is shared with, and how long it is kept.',
-  alternates: { canonical: '/privacy' },
+    "What personal data the Lead Distribution Platform collects, why it is collected, who it is shared with, and how long it is kept.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {
