@@ -1,6 +1,4 @@
 import type { Metadata, Viewport } from 'next';
-import Link from 'next/link';
-import { RouteIcon } from '@/components/icons';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -26,35 +24,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <a className="skip-link" href="#main">
+        <a
+          href="#main"
+          className="bg-card focus:ring-ring sr-only rounded-md border px-4 py-2 focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50"
+        >
           Skip to main content
         </a>
-
-        <header className="site-header">
-          <div className="container site-header__inner">
-            <Link className="brand" href="/">
-              <span className="brand__mark">
-                <RouteIcon size={17} />
-              </span>
-              Lead Distribution
-            </Link>
-
-            <nav className="nav" aria-label="Main">
-              <Link className="nav__link" href="/health">
-                Health
-              </Link>
-            </nav>
-          </div>
-        </header>
-
-        <main id="main">{children}</main>
-
-        <footer className="site-footer">
-          <div className="container site-footer__inner">
-            <span>Lead Distribution Platform</span>
-            <Link href="/health">System health</Link>
-          </div>
-        </footer>
+        {children}
       </body>
     </html>
   );
