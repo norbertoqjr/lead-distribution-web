@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import { Route } from 'lucide-react';
-import { logout } from '@/lib/actions';
 import { AdminNav } from './nav';
-import { Button } from '@/components/ui/button';
+import { LogoutButton } from './logout-button';
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   return (
@@ -19,11 +18,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <AdminNav />
           </div>
 
-          <form action={logout}>
-            <Button type="submit" variant="ghost" size="sm">
-              Sign out
-            </Button>
-          </form>
+          <LogoutButton />
         </div>
       </header>
 

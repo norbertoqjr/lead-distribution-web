@@ -1,27 +1,52 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { CheckCircle2 } from 'lucide-react';
-import { submitLead, type ActionState } from '@/lib/actions';
+import { http, toMessage } from '@/lib/http';
+import { leadFormSchema, type LeadFormInput } from '@/lib/schemas';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { SubmitButton } from '@/components/admin/submit-button';
 import { FieldError, FormError } from '@/components/admin/field-error';
 
-const initialState: ActionState = {};
-
 export function PublicLeadForm({ slug }: { slug: string }) {
-  const action = submitLead.bind(null, slug);
-  const [state, formAction] = useActionState(action, initialState);
+  const [formError, setFormError] = useState<string>();
+  const [submitted, setSubmitted] = useState(false);
 
-  if (state.success) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LeadFormInput>({
+    resolver: zodResolver(leadFormSchema),
+    mode: 'onBlur',
+    defaultValues: { name: '', email: '', phone: '' },
+  });
+
+  const onSubmit = handleSubmit(async (values) => {
+    setFormError(undefined);
+
+    try {
+      await http.post(
+        `/public/forms/${encodeURIComponent(slug)}/submit`,
+        values,
+      );
+      setSubmitted(true);
+    } catch (error) {
+      setFormError(toMessage(error));
+    }
+  });
+
+  if (submitted) {
     return (
       <div
         role="status"
         className="border-success/40 bg-success/10 rounded-lg border p-6 text-center"
       >
         <CheckCircle2
-          className="mx-auto mb-2 size-6 text-success"
+          className="text-success mx-auto mb-2 size-6"
           aria-hidden="true"
         />
         <p className="font-medium">Thank you — we have your details.</p>
@@ -33,35 +58,33 @@ export function PublicLeadForm({ slug }: { slug: string }) {
   }
 
   return (
-    <form action={formAction} className="space-y-4" noValidate>
-      <FormError message={state.error} />
+    <form onSubmit={onSubmit} className="space-y-4" noValidate>
+      <FormError message={formError} />
 
       <div>
         <Label htmlFor="name">Name</Label>
         <Input
           id="name"
-          name="name"
           autoComplete="name"
-          required
-          aria-invalid={Boolean(state.fieldErrors?.name)}
+          aria-invalid={Boolean(errors.name)}
           className="mt-1.5"
+          {...register('name')}
         />
-        <FieldError message={state.fieldErrors?.name} />
+        <FieldError message={errors.name?.message} />
       </div>
 
       <div>
         <Label htmlFor="email">Email</Label>
         <Input
           id="email"
-          name="email"
           // type="email" brings up the right mobile keyboard.
           type="email"
           autoComplete="email"
-          required
-          aria-invalid={Boolean(state.fieldErrors?.email)}
+          aria-invalid={Boolean(errors.email)}
           className="mt-1.5"
+          {...register('email')}
         />
-        <FieldError message={state.fieldErrors?.email} />
+        <FieldError message={errors.email?.message} />
       </div>
 
       <div>
@@ -70,15 +93,17 @@ export function PublicLeadForm({ slug }: { slug: string }) {
         </Label>
         <Input
           id="phone"
-          name="phone"
           type="tel"
           autoComplete="tel"
           className="mt-1.5"
+          {...register('phone')}
         />
-        <FieldError message={state.fieldErrors?.phone} />
+        <FieldError message={errors.phone?.message} />
       </div>
 
-      <SubmitButton pendingLabel="Sending…">Submit</SubmitButton>
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? 'Sending…' : 'Submit'}
+      </Button>
     </form>
   );
 }

@@ -1,23 +1,45 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Controller, useForm, useWatch } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { http, toMessage } from '@/lib/http';
 import {
-  createDistribution,
-  setDistributionBrokers,
-  type ActionState,
-} from '@/lib/actions';
-import type { Broker, Distribution } from '@/lib/schemas';
+  setBrokersSchema,
+  type Broker,
+  type Distribution,
+  type SetBrokersFormValues,
+  type SetBrokersInput,
+} from '@/lib/schemas';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { SubmitButton } from './submit-button';
-import { FormError } from './field-error';
-
-const initialState: ActionState = {};
+import { FieldError, FormError } from './field-error';
 
 /** Shown before a distribution exists. */
 export function CreateDistribution({ brokers }: { brokers: Broker[] }) {
-  const [state, formAction] = useActionState(createDistribution, initialState);
+  const router = useRouter();
+  const [formError, setFormError] = useState<string>();
+  const [selected, setSelected] = useState<number[]>(brokers.map((b) => b.id));
+  const [submitting, setSubmitting] = useState(false);
+
+  async function onSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setFormError(undefined);
+    setSubmitting(true);
+
+    try {
+      await http.post('/distributions', { brokerIds: selected });
+      router.refresh();
+    } catch (error) {
+      // Carries the API's exact message when no form exists yet.
+      setFormError(toMessage(error));
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <Card className="max-w-2xl">
@@ -25,9 +47,8 @@ export function CreateDistribution({ brokers }: { brokers: Broker[] }) {
         <CardTitle className="text-base">Create the distribution</CardTitle>
       </CardHeader>
       <CardContent>
-        <form action={formAction} className="space-y-4">
-          {/* Carries the API's exact message when no form exists yet. */}
-          <FormError message={state.error} />
+        <form onSubmit={onSubmit} className="space-y-4">
+          <FormError message={formError} />
 
           {brokers.length === 0 ? (
             <p className="text-muted-foreground text-sm">
@@ -42,7 +63,16 @@ export function CreateDistribution({ brokers }: { brokers: Broker[] }) {
                     key={broker.id}
                     className="flex items-center gap-2 text-sm"
                   >
-                    <Checkbox name="brokerIds" value={broker.id} defaultChecked />
+                    <Checkbox
+                      checked={selected.includes(broker.id)}
+                      onCheckedChange={(checked) =>
+                        setSelected((current) =>
+                          checked === true
+                            ? [...current, broker.id]
+                            : current.filter((id) => id !== broker.id),
+                        )
+                      }
+                    />
                     {broker.name}
                   </label>
                 ))}
@@ -50,9 +80,9 @@ export function CreateDistribution({ brokers }: { brokers: Broker[] }) {
             </fieldset>
           )}
 
-          <SubmitButton pendingLabel="Creating…">
-            Create distribution
-          </SubmitButton>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? 'Creating…' : 'Create distribution'}
+          </Button>
         </form>
       </CardContent>
     </Card>
@@ -67,12 +97,51 @@ export function DistributionBrokers({
   distribution: Distribution;
   brokers: Broker[];
 }) {
-  const action = setDistributionBrokers.bind(null, distribution.id);
-  const [state, formAction] = useActionState(action, initialState);
+  const router = useRouter();
+  const [formError, setFormError] = useState<string>();
 
-  const total = distribution.brokers
-    .filter((member) => member.isActive)
-    .reduce((sum, member) => sum + member.percentage, 0);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<SetBrokersFormValues, unknown, SetBrokersInput>({
+    resolver: zodResolver(setBrokersSchema),
+    mode: 'onBlur',
+    defaultValues: {
+      brokers: brokers.map((broker) => {
+        const member = distribution.brokers.find(
+          (entry) => entry.brokerId === broker.id,
+        );
+
+        return {
+          brokerId: broker.id,
+          percentage: member?.percentage ?? 0,
+          isActive: Boolean(member),
+        };
+      }),
+    },
+  });
+
+  // useWatch rather than watch(): the latter cannot be memoized safely and
+  // re-renders the whole form on every keystroke.
+  const values = useWatch({ control, name: 'brokers' });
+  const total = values
+    .filter((entry) => entry.isActive)
+    .reduce((sum, entry) => sum + (Number(entry.percentage) || 0), 0);
+
+  const onSubmit = handleSubmit(async (data) => {
+    setFormError(undefined);
+
+    try {
+      // Only selected brokers are sent; the API removes the rest.
+      await http.patch(`/distributions/${distribution.id}/brokers`, {
+        brokers: data.brokers.filter((entry) => entry.isActive),
+      });
+      router.refresh();
+    } catch (error) {
+      setFormError(toMessage(error));
+    }
+  });
 
   return (
     <Card>
@@ -80,51 +149,65 @@ export function DistributionBrokers({
         <CardTitle className="text-base">Broker shares</CardTitle>
       </CardHeader>
       <CardContent>
-        <form action={formAction} className="space-y-4">
-          <FormError message={state.error} />
+        <form onSubmit={onSubmit} className="space-y-4" noValidate>
+          <FormError message={formError} />
 
           <div className="space-y-3">
-            {brokers.map((broker) => {
-              const member = distribution.brokers.find(
-                (entry) => entry.brokerId === broker.id,
-              );
-
-              return (
-                <div
-                  key={broker.id}
-                  className="flex flex-wrap items-center gap-3 rounded-md border p-3"
-                >
-                  <label className="flex min-w-40 flex-1 items-center gap-2 text-sm font-medium">
-                    <Checkbox
-                      name="brokerIds"
-                      value={broker.id}
-                      defaultChecked={Boolean(member)}
-                    />
-                    {broker.name}
-                  </label>
-
-                  <div className="flex items-center gap-2">
-                    <label
-                      htmlFor={`percentage-${broker.id}`}
-                      className="text-muted-foreground text-sm"
-                    >
-                      Share
+            {brokers.map((broker, index) => (
+              <div
+                key={broker.id}
+                className="flex flex-wrap items-center gap-3 rounded-md border p-3"
+              >
+                <Controller
+                  control={control}
+                  name={`brokers.${index}.isActive`}
+                  render={({ field }) => (
+                    <label className="flex min-w-40 flex-1 items-center gap-2 text-sm font-medium">
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={(checked) =>
+                          field.onChange(checked === true)
+                        }
+                      />
+                      {broker.name}
                     </label>
-                    <Input
-                      id={`percentage-${broker.id}`}
-                      name={`percentage-${broker.id}`}
-                      type="number"
-                      min={0}
-                      max={100}
-                      step="0.01"
-                      defaultValue={member?.percentage ?? 0}
-                      className="w-24 tabular-nums"
-                    />
-                    <span className="text-muted-foreground text-sm">%</span>
-                  </div>
+                  )}
+                />
+
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor={`percentage-${broker.id}`}
+                    className="text-muted-foreground text-sm"
+                  >
+                    Share
+                  </label>
+                  <Controller
+                    control={control}
+                    name={`brokers.${index}.percentage`}
+                    render={({ field }) => (
+                      <Input
+                        id={`percentage-${broker.id}`}
+                        type="number"
+                        min={0}
+                        max={100}
+                        step="0.01"
+                        className="w-24 tabular-nums"
+                        value={field.value}
+                        onChange={(event) =>
+                          field.onChange(event.target.valueAsNumber || 0)
+                        }
+                        onBlur={field.onBlur}
+                      />
+                    )}
+                  />
+                  <span className="text-muted-foreground text-sm">%</span>
                 </div>
-              );
-            })}
+
+                <FieldError
+                  message={errors.brokers?.[index]?.percentage?.message}
+                />
+              </div>
+            ))}
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -139,7 +222,9 @@ export function DistributionBrokers({
                 </span>
               )}
             </p>
-            <SubmitButton>Save shares</SubmitButton>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving…' : 'Save shares'}
+            </Button>
           </div>
         </form>
       </CardContent>

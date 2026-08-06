@@ -31,14 +31,14 @@ export const brokerSchema = z
   .object({
     name: trimmed.pipe(z.string().min(1, 'Name is required').max(255)),
     isActive: z.boolean().default(true),
-    dailyCap: z.coerce
+    dailyCap: z
       .number()
       .int('Daily cap must be a whole number')
       .min(0)
       .max(100000),
     timezone: z.string().min(1, 'Timezone is required'),
-    openMinute: z.coerce.number().int().min(0).max(1440),
-    closeMinute: z.coerce.number().int().min(0).max(1440),
+    openMinute: z.number().int().min(0).max(1440),
+    closeMinute: z.number().int().min(0).max(1440),
     workingDays: z
       .array(z.number().int().min(1).max(7))
       .min(1, 'Select at least one working day')
@@ -48,7 +48,9 @@ export const brokerSchema = z
     message: 'Opening and closing time cannot be the same',
     path: ['closeMinute'],
   });
-export type BrokerInput = z.infer<typeof brokerSchema>;
+export type BrokerInput = z.output<typeof brokerSchema>;
+/** What the form holds before defaults are applied — RHF's first generic. */
+export type BrokerFormValues = z.input<typeof brokerSchema>;
 
 export const formSchema = z.object({
   name: trimmed.pipe(z.string().min(1, 'Form name is required').max(255)),
@@ -67,7 +69,7 @@ export type FormInput = z.infer<typeof formSchema>;
 
 export const distributionBrokerSchema = z.object({
   brokerId: z.number().int(),
-  percentage: z.coerce
+  percentage: z
     .number()
     .min(0, 'Percentage cannot be negative')
     .max(100, 'Percentage cannot exceed 100'),
@@ -77,7 +79,8 @@ export const distributionBrokerSchema = z.object({
 export const setBrokersSchema = z.object({
   brokers: z.array(distributionBrokerSchema),
 });
-export type SetBrokersInput = z.infer<typeof setBrokersSchema>;
+export type SetBrokersInput = z.output<typeof setBrokersSchema>;
+export type SetBrokersFormValues = z.input<typeof setBrokersSchema>;
 
 export const leadFormSchema = z.object({
   name: trimmed.pipe(z.string().min(1, 'Name is required').max(255)),
