@@ -91,7 +91,10 @@ jobs:
             . ./.env
             set +a
 
-            npm ci
+            # --include=dev is required: sourcing .env above exported
+            # NODE_ENV=production, which makes npm omit devDependencies, and
+            # next build needs typescript and the type packages.
+            npm ci --include=dev
             npm run build
 
             pm2 restart lds-web --update-env \
