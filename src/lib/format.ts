@@ -8,6 +8,19 @@ export function minutesToTime(minutes: number): string {
 
 const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+/**
+ * The stored "1,2,3" form back into the numbers the broker form edits.
+ *
+ * The API sends working days as a comma-separated string while the form works
+ * in numbers, so editing an existing broker has to convert on the way in.
+ */
+export function parseWorkingDays(value: string): number[] {
+  return value
+    .split(",")
+    .map((part) => Number.parseInt(part.trim(), 10))
+    .filter((day) => day >= 1 && day <= 7);
+}
+
 export function formatWorkingDays(value: string): string {
   const days = value
     .split(",")

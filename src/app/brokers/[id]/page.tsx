@@ -11,6 +11,7 @@ import {
   type Paginated,
   type Lead,
 } from "@/lib/schemas";
+import { BrokerForm } from "@/components/admin/broker-form";
 import { DashboardCard } from "@/components/admin/dashboard-card";
 import { AdminShell, EmptyState, PageHeader } from "@/components/admin/shell";
 import { StatusBadge } from "@/components/admin/status-badge";
@@ -68,6 +69,8 @@ export default async function BrokerDetailPage({
           broker.dailyCap === 0 ? "unlimited" : broker.dailyCap
         }`}
       />
+
+      <BrokerForm broker={broker} />
 
       {leads.total === 0 ? (
         <EmptyState
