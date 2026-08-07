@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Route } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Route } from "lucide-react";
 import { http, toMessage } from "@/lib/http";
 import { loginSchema, type LoginInput } from "@/lib/schemas";
 import { Button } from "@/components/ui/button";
@@ -16,13 +16,13 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { FieldError, FormError } from "@/components/admin/field-error";
 
 export function LoginForm({ next }: { next?: string }) {
   const router = useRouter();
   const [formError, setFormError] = useState<string>();
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -69,7 +69,11 @@ export function LoginForm({ next }: { next?: string }) {
 
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Sign in</CardTitle>
+          {/* A real h1: this is the page's only heading, and CardTitle is a
+              div, which leaves the page with no outline at all. */}
+          <h1 className="text-xl leading-none font-semibold tracking-tight">
+            Sign in
+          </h1>
           <CardDescription>
             Admin access to the lead distribution platform.
           </CardDescription>
@@ -85,6 +89,7 @@ export function LoginForm({ next }: { next?: string }) {
                 id="email"
                 type="email"
                 autoComplete="username"
+                autoFocus
                 aria-invalid={Boolean(errors.email)}
                 className="mt-1.5"
                 {...register("email")}
@@ -94,19 +99,36 @@ export function LoginForm({ next }: { next?: string }) {
 
             <div>
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                aria-invalid={Boolean(errors.password)}
-                className="mt-1.5"
-                {...register("password")}
-              />
+              {/* Typing a password blind is the most common reason a correct
+                  one gets rejected, so let people check it. */}
+              <div className="relative mt-1.5">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  aria-invalid={Boolean(errors.password)}
+                  className="pr-11"
+                  {...register("password")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((shown) => !shown)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute inset-y-0 right-0 grid w-11 place-items-center rounded-r-md focus-visible:ring-2 focus-visible:outline-none"
+                >
+                  {showPassword ? (
+                    <EyeOff className="size-4" aria-hidden="true" />
+                  ) : (
+                    <Eye className="size-4" aria-hidden="true" />
+                  )}
+                </button>
+              </div>
               <FieldError message={errors.password?.message} />
             </div>
 
             {/* Disabled while submitting so a double click cannot fire twice */}
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Signing in…" : "Sign in"}
             </Button>
           </form>
