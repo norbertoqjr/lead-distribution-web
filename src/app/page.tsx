@@ -2,6 +2,7 @@ import { Activity, Clock, ShieldCheck, Users } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Card, CardContent } from "@/components/ui/card";
+import { ScrollSequence } from "@/components/scroll-sequence";
 
 /** The lead one gets the wide cell; the rest sit beneath it. */
 const lead = {
@@ -53,6 +54,11 @@ export default function HomePage() {
             </p>
           </div>
         </section>
+
+        {/* Sits between the pitch and the detail: the sequence plays as you
+            scroll past it, then hands the page back. background matches the
+            page so the letterbox bars read as margin, not as a black slab. */}
+        <ScrollSequence background="#F5F7F5" className="border-b" />
 
         <section className="mx-auto max-w-5xl px-6 py-12">
           <h2 className="text-muted-foreground mb-6 text-xs font-semibold tracking-wider uppercase">
