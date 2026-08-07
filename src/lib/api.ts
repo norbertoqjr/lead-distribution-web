@@ -64,7 +64,13 @@ export async function apiFetch<T>(
       timeout: 15000,
     });
 
-    const parsed = schema.safeParse(response.data);
+    // Nest serializes a null return as a zero-byte body, which axios hands
+    // back as "". Endpoints that legitimately answer "nothing yet" — no form,
+    // no distribution — would otherwise fail their nullable schema and surface
+    // as a 502 on a fresh database.
+    const body = response.data === "" ? null : response.data;
+
+    const parsed = schema.safeParse(body);
 
     if (!parsed.success) {
       // An unexpected shape is a handled error, not a crash halfway through

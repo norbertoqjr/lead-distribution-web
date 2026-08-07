@@ -1,4 +1,4 @@
-import { isSecureOrigin, readSessionCookie } from "./session-cookie";
+import { isSecureOrigin, proxyHeaders, readSessionCookie } from "./session-cookie";
 
 const NAME = "lds_session";
 
@@ -69,5 +69,33 @@ describe("isSecureOrigin", () => {
     delete process.env.NEXT_PUBLIC_SITE_URL;
 
     expect(isSecureOrigin()).toBe(false);
+  });
+});
+
+describe("proxyHeaders", () => {
+  it("forwards the visitor's address to the backend", () => {
+    // Without this the API attributes every lead to 127.0.0.1, since this
+    // server is the only client it ever sees.
+    expect(
+      proxyHeaders({ cookieName: NAME, forwardedFor: "203.0.113.7" }),
+    ).toEqual({
+      "Content-Type": "application/json",
+      "X-Forwarded-For": "203.0.113.7",
+    });
+  });
+
+  it("attaches the session cookie when the browser holds one", () => {
+    expect(
+      proxyHeaders({ cookieName: NAME, token: "abc", forwardedFor: null }),
+    ).toEqual({
+      "Content-Type": "application/json",
+      Cookie: `${NAME}=abc`,
+    });
+  });
+
+  it("omits both when there is neither", () => {
+    expect(proxyHeaders({ cookieName: NAME })).toEqual({
+      "Content-Type": "application/json",
+    });
   });
 });
