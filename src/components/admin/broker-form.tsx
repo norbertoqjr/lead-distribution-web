@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { http, toMessage } from "@/lib/http";
 import {
   brokerSchema,
+  type Broker,
   type BrokerFormValues,
   type BrokerInput,
 } from "@/lib/schemas";
@@ -16,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FieldError, FormError } from "./field-error";
-import { minutesToTime } from "@/lib/format";
+import { minutesToTime, parseWorkingDays } from "@/lib/format";
 
 const DAYS = [
   { value: 1, label: "Mon" },
@@ -50,9 +51,18 @@ function toMinutes(value: string): number {
   return hours * 60 + minutes;
 }
 
-export function BrokerForm() {
+/**
+ * Creates a broker, or edits one when given `broker`.
+ *
+ * The two are the same set of fields with the same validation, so they share a
+ * component rather than drifting apart — an edit form that accepts something
+ * the create form rejects is a bug waiting to happen.
+ */
+export function BrokerForm({ broker }: { broker?: Broker }) {
   const router = useRouter();
   const [formError, setFormError] = useState<string>();
+  const [saved, setSaved] = useState(false);
+  const editing = broker !== undefined;
 
   const {
     register,
@@ -66,23 +76,33 @@ export function BrokerForm() {
     resolver: zodResolver(brokerSchema),
     mode: "onBlur",
     defaultValues: {
-      name: "",
-      isActive: true,
-      dailyCap: 0,
-      timezone: "Asia/Manila",
-      openMinute: 9 * 60,
-      closeMinute: 18 * 60,
-      workingDays: [1, 2, 3, 4, 5],
+      name: broker?.name ?? "",
+      isActive: broker?.isActive ?? true,
+      dailyCap: broker?.dailyCap ?? 0,
+      timezone: broker?.timezone ?? "Asia/Manila",
+      openMinute: broker?.openMinute ?? 9 * 60,
+      closeMinute: broker?.closeMinute ?? 18 * 60,
+      workingDays: broker
+        ? parseWorkingDays(broker.workingDays)
+        : [1, 2, 3, 4, 5],
     },
   });
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(undefined);
+    setSaved(false);
 
     try {
-      await http.post("/brokers", values);
-      reset();
-      // Re-render the server component so the new broker appears in the table.
+      if (editing) {
+        await http.patch(`/brokers/${broker.id}`, values);
+        setSaved(true);
+      } else {
+        await http.post("/brokers", values);
+        reset();
+      }
+
+      // Re-render the server component so the table and the page header show
+      // the change without a reload.
       router.refresh();
     } catch (error) {
       setFormError(toMessage(error));
@@ -92,7 +112,9 @@ export function BrokerForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Add a broker</CardTitle>
+        <CardTitle className="text-base">
+          {editing ? "Edit broker" : "Add a broker"}
+        </CardTitle>
       </CardHeader>
 
       <CardContent>
@@ -246,9 +268,23 @@ export function BrokerForm() {
             )}
           />
 
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Adding…" : "Add broker"}
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting
+                ? editing
+                  ? "Saving…"
+                  : "Adding…"
+                : editing
+                  ? "Save changes"
+                  : "Add broker"}
+            </Button>
+
+            {saved ? (
+              <p role="status" className="text-muted-foreground text-sm">
+                Saved.
+              </p>
+            ) : null}
+          </div>
         </form>
       </CardContent>
     </Card>

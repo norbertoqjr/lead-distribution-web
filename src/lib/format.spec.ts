@@ -3,6 +3,7 @@ import {
   formatRelative,
   formatWorkingDays,
   minutesToTime,
+  parseWorkingDays,
 } from "./format";
 
 describe("minutesToTime", () => {
@@ -114,5 +115,19 @@ describe("formatRelative", () => {
   it("renders a dash for null and for garbage", () => {
     expect(formatRelative(null, now)).toBe("—");
     expect(formatRelative("nonsense", now)).toBe("—");
+  });
+});
+
+describe("parseWorkingDays", () => {
+  it("reads the stored string back into numbers", () => {
+    expect(parseWorkingDays("1,2,3,4,5")).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  it("tolerates spacing", () => {
+    expect(parseWorkingDays("6, 7")).toEqual([6, 7]);
+  });
+
+  it("drops anything outside Monday to Sunday", () => {
+    expect(parseWorkingDays("0,3,9,")).toEqual([3]);
   });
 });
