@@ -42,6 +42,12 @@ type ScrollSequenceProps = {
    */
   fit?: Fit;
   /**
+   * Aspect ratio of the visible band, width over height. Matching the frames'
+   * own ratio is what makes the sequence run full width with no letterboxing;
+   * pass something taller only if you want a cropped band.
+   */
+  aspectRatio?: number;
+  /**
    * Fills the letterbox bars and the section behind the canvas. Black suits
    * footage; a page-matching colour suits a banner that should sit in the
    * layout rather than punch a hole in it.
@@ -173,6 +179,7 @@ export function ScrollSequence({
   frameUrl = defaultFrameUrl,
   scrollLength = 4,
   fit = "contain",
+  aspectRatio = 16 / 9,
   background = "#000000",
   className,
 }: ScrollSequenceProps) {
@@ -324,9 +331,12 @@ export function ScrollSequence({
       className={className}
       aria-label="Scroll-driven animation"
     >
+      {/* Full-bleed band sized to the frames' own ratio, so the sequence runs
+          edge to edge with nothing letterboxed away. Capped at the viewport
+          height so an unusually tall ratio cannot push the page around. */}
       <div
-        className="relative h-dvh w-full overflow-hidden"
-        style={{ backgroundColor: background }}
+        className="relative w-full overflow-hidden"
+        style={{ aspectRatio, maxHeight: "100dvh", backgroundColor: background }}
       >
         {/* Decorative: the section carries the accessible name. */}
         <canvas ref={canvasRef} className="block h-full w-full" role="none" />
