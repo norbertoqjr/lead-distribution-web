@@ -34,6 +34,12 @@ export default function HomePage() {
       <SiteHeader />
 
       <main id="main">
+        {/* The scroll sequence is built and its frames are in public/banner,
+            but it is not shown. Restore it by putting this back above the
+            hero:
+
+            <ScrollSequence background="#F5F7F5" /> */}
+
         <section className="border-b">
           <div className="mx-auto max-w-5xl px-6 py-16 sm:py-24">
             <p className="text-muted-foreground bg-muted mb-6 inline-flex rounded-full border px-3 py-1 text-xs font-medium">

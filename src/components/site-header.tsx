@@ -18,8 +18,11 @@ export async function SiteHeader() {
   const signedIn = Boolean(store.get(SESSION_COOKIE)?.value);
 
   return (
-    <header className="bg-card border-b">
-      <div className="mx-auto flex min-h-15 max-w-5xl items-center justify-between gap-4 px-6">
+    /* Floating bar: sticks to the top and sits over the page rather than
+       occupying a band of it, so a full-bleed banner runs underneath. The
+       blur keeps the links legible against whatever scrolls past. */
+    <header className="sticky top-0 z-40 px-3 pt-3 sm:px-4 sm:pt-4">
+      <div className="bg-card/85 border-border/60 shadow-[0_1px_3px_rgb(16_19_17_/_0.06)] mx-auto flex min-h-14 max-w-5xl items-center justify-between gap-4 rounded-full border px-4 backdrop-blur-md sm:px-6">
         <Link
           href="/"
           className="flex items-center gap-2 font-semibold hover:no-underline"
