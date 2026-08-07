@@ -35,6 +35,10 @@ export default function HomePage() {
       <SiteHeader />
 
       <main id="main">
+        {/* Leads the page: the sequence is the first thing a visitor sees, and
+            it plays through before handing over to the words below it. */}
+        <ScrollSequence background="#F5F7F5" />
+
         <section className="border-b">
           <div className="mx-auto max-w-5xl px-6 py-16 sm:py-24">
             <p className="text-muted-foreground bg-muted mb-6 inline-flex rounded-full border px-3 py-1 text-xs font-medium">
@@ -54,11 +58,6 @@ export default function HomePage() {
             </p>
           </div>
         </section>
-
-        {/* Sits between the pitch and the detail: the sequence plays as you
-            scroll past it, then hands the page back. background matches the
-            page so the letterbox bars read as margin, not as a black slab. */}
-        <ScrollSequence background="#F5F7F5" className="border-b" />
 
         <section className="mx-auto max-w-5xl px-6 py-12">
           <h2 className="text-muted-foreground mb-6 text-xs font-semibold tracking-wider uppercase">
