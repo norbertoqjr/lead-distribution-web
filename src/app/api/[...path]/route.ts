@@ -1,5 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { isSecureOrigin, readSessionCookie } from "@/lib/session-cookie";
+import {
+  isSecureOrigin,
+  proxyHeaders,
+  readSessionCookie,
+} from "@/lib/session-cookie";
 
 /**
  * Same-origin proxy to the backend.
@@ -49,6 +53,12 @@ async function forward(
   target.search = request.nextUrl.search;
 
   const token = request.cookies.get(SESSION_COOKIE)?.value;
+
+  // The API sees this server as its client, so a lead submitted through the
+  // proxy would be attributed to 127.0.0.1. Next fills in X-Forwarded-For from
+  // the socket, so passing it on is what lets the backend record the visitor.
+  // The backend only reads it when TRUST_PROXY is enabled.
+  const forwardedFor = request.headers.get("x-forwarded-for");
   const body =
     request.method === "GET" || request.method === "DELETE"
       ? undefined
@@ -59,10 +69,11 @@ async function forward(
   try {
     response = await fetch(target, {
       method: request.method,
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Cookie: `${SESSION_COOKIE}=${token}` } : {}),
-      },
+      headers: proxyHeaders({
+        cookieName: SESSION_COOKIE,
+        token,
+        forwardedFor,
+      }),
       body,
       cache: "no-store",
     });
