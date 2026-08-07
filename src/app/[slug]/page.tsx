@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { z } from "zod";
 import { PublicLeadForm } from "@/components/public-lead-form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FormShell } from "./form-shell";
+import { Card, CardContent } from "@/components/ui/card";
 import { noIndex } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -72,18 +73,12 @@ export default async function PublicFormPage({
   if (!form) notFound();
 
   return (
-    <main
-      id="main"
-      className="mx-auto flex min-h-dvh max-w-md items-center px-6 py-12"
-    >
+    <FormShell title={form.name}>
       <Card className="w-full">
-        <CardHeader>
-          <CardTitle>{form.name}</CardTitle>
-        </CardHeader>
         <CardContent>
           <PublicLeadForm slug={form.slug} />
         </CardContent>
       </Card>
-    </main>
+    </FormShell>
   );
 }
