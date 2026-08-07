@@ -2,7 +2,6 @@ import { Activity, Clock, ShieldCheck, Users } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { ScrollSequence } from "@/components/scroll-sequence";
 
 /** The lead one gets the wide cell; the rest sit beneath it. */
 const lead = {
@@ -35,9 +34,11 @@ export default function HomePage() {
       <SiteHeader />
 
       <main id="main">
-        {/* Leads the page: the sequence is the first thing a visitor sees, and
-            it plays through before handing over to the words below it. */}
-        <ScrollSequence background="#F5F7F5" />
+        {/* The scroll sequence is built and its frames are in public/banner,
+            but it is not shown. Restore it by putting this back above the
+            hero:
+
+            <ScrollSequence background="#F5F7F5" /> */}
 
         <section className="border-b">
           <div className="mx-auto max-w-5xl px-6 py-16 sm:py-24">
