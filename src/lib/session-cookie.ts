@@ -10,6 +10,29 @@ export function isSecureOrigin(): boolean {
   return (process.env.NEXT_PUBLIC_SITE_URL ?? "").startsWith("https://");
 }
 
+/**
+ * Headers the proxy sends to the backend.
+ *
+ * X-Forwarded-For is what lets the API attribute a lead to the visitor rather
+ * than to this server, which is its only client. Kept a pure function so the
+ * forwarding is testable without standing up both servers.
+ */
+export function proxyHeaders(options: {
+  cookieName: string;
+  token?: string;
+  forwardedFor?: string | null;
+}): Record<string, string> {
+  return {
+    "Content-Type": "application/json",
+    ...(options.token
+      ? { Cookie: `${options.cookieName}=${options.token}` }
+      : {}),
+    ...(options.forwardedFor
+      ? { "X-Forwarded-For": options.forwardedFor }
+      : {}),
+  };
+}
+
 export type CookieAction =
   { type: "none" } | { type: "set"; value: string } | { type: "clear" };
 
